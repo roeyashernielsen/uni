@@ -11,4 +11,5 @@ dependencies:
   - pylint
   - flake8
   - black
+  - coverage
   - pip
