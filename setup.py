@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from importlib.machinery import SourceFileLoader
 
 version = (
-    SourceFileLoader("uni.version", os.path.join("uni", "version.py"))
+    SourceFileLoader("uni.version", os.path.join("src/uni", "version.py"))
     .load_module()
     .VERSION
 )
