@@ -1,0 +1,13 @@
+name: uni
+
+channels:
+  - defaults
+
+dependencies:
+  - python>=3.6
+  - pytest
+  - sphinx
+  - pylint
+  - flake8
+  - black
+  - pip
