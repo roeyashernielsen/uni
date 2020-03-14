@@ -24,7 +24,7 @@ pre-commit:
   image: python:3.7
   stage: test
   script: tox -e pre-commit
-  
+
 yoshi:
   stage: test
   script: tox -e yoshi

@@ -1,18 +1,17 @@
 """Setup functionality for the Uni package."""
 import os
-from importlib.machinery import SourceFileLoader
+
+import importlib.util
 
 from setuptools import find_packages, setup
 
-version = (
-    SourceFileLoader("uni.version", os.path.join("src", "uni", "version.py"))
-    .load_module()
-    .VERSION
-)
+spec = importlib.util.spec_from_file_location("uni.version", os.path.join("src", "uni", "version.py"))
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
 
 setup(
     name="uni",
-    version=version,
+    version=module.VERSION,
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=["uni"],

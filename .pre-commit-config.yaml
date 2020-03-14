@@ -9,4 +9,4 @@ repos:
     rev: v0.720
     hooks:
     -   id: mypy
-#        exclude: ^(docs/|example-plugin/|tests/fixtures)
+        exclude: ^(docs/|setup.py)
