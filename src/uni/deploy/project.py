@@ -1,4 +1,4 @@
-"""Deploy utils"""
+"""Deploy utils."""
 
 
 class Project(object):

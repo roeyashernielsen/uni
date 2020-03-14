@@ -1,4 +1,4 @@
-"""UNI Flow class"""
+"""UNI Flow class."""
 import mlflow
 from mlflow.tracking import MlflowClient
 

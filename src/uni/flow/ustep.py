@@ -1,10 +1,14 @@
-"""UNI Step class"""
+"""UNI Step class."""
 import functools
+
 import mlflow
+
 from prefect import task
 
 
 def mlflow_wrapper(func, run_id=None, run_name=None):
+    """MLflow Wrapper."""
+
     @functools.wraps(func)
     def wrapper(**kwargs):
         with mlflow.start_run(run_id=run_id, run_name=run_name):
@@ -14,6 +18,8 @@ def mlflow_wrapper(func, run_id=None, run_name=None):
 
 
 class UStep:
+    """Ustep decorator."""
+
     def __init__(self, func):
         functools.update_wrapper(self, func)
         self.func = mlflow_wrapper(func)

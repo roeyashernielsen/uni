@@ -10,7 +10,7 @@ def save_obj(obj, path=None, format=None, mode=None, **options):
     pass
 
 
-def save_df(df, path=None, format=None, mode=None, partitionBy=None, **options):
+def save_df(df, path=None, format=None, mode=None, partition=None, **options):
     """
     Saves the contents of the :class:`DataFrame` to a data source.
     In addition, log the file or directory as an artifact of the currently MLflow active run.
