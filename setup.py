@@ -1,11 +1,14 @@
 """Setup functionality for the Uni package."""
-import os
 
 import importlib.util
+import os
 
 from setuptools import find_packages, setup
 
-spec = importlib.util.spec_from_file_location("uni.version", os.path.join("src", "uni", "version.py"))
+spec = importlib.util.spec_from_file_location(
+    "uni.version",
+    os.path.join("src", "uni", "version.py")
+)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
