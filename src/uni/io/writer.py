@@ -1,3 +1,6 @@
+"""Writers utils."""
+
+
 def save_obj(obj, path=None, format=None, mode=None, **options):
     """
     Saves the contents of the :class:`DataFrame` to a data source.

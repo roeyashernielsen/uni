@@ -1,3 +1,6 @@
+"""Reader utils."""
+
+
 def load_obj(name=None, path=None, format=None, **options):
     """
     Loads data from a data source and returns it as a :class:`DataFrame`.
