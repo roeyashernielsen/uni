@@ -1,0 +1,7 @@
+-   id: uni
+    name: uni
+    description: '`UNI` is an ML workflow management tool.'
+    entry: uni
+    language: python
+    types: [python]
+#    require_serial: true
