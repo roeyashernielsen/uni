@@ -1,12 +1,10 @@
 """UNI Flow class."""
-import mlflow
-from mlflow.tracking import MlflowClient
+# import mlflow
+# from mlflow.tracking import MlflowClient
 
 
-class UFlow(object):
-    """
-    Main class from which all pipelines should inherit.
-    """
+class UFlow:
+    """Main class from which all pipelines should inherit."""
 
     # def __init__(self, name=None, experiment_name=None):
     #     self.name = name
@@ -29,19 +27,10 @@ class UFlow(object):
     #     del self.__previous_flow
 
     def run(self, start_step=None, end_step=None, backend=None):
-        """
-        Run the pipeline from start_step to end_step
-        """
-        pass
+        """Run the pipeline from start_step to end_step."""
 
     def run_step(self, step_name=None, backend=None):
-        """
-        Run a single step
-        """
-        pass
+        """Run a single step."""
 
     def resume(self, run_id=None, backend=None):
-        """
-        Resume execution of a previous run of this pipeline
-        """
-        pass
+        """Resume execution of a previous run of this pipeline."""
