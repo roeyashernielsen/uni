@@ -6,7 +6,7 @@ stages:
   - release
 
 before_script:
-  - python -V  # Print out python version for debugging
+  - python -V
   - pip install pip --upgrade
   - pip install tox
 
@@ -14,11 +14,6 @@ python37:
   image: python:3.7
   stage: test
   script: tox -e py37
-
-python38:
-  image: python:3.8
-  stage: test
-  script: tox -e py38
 
 linters:
   image: python:3.7
