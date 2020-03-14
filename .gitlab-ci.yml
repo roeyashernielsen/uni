@@ -2,8 +2,8 @@ image: python
 
 stages:
   - test
-  - build
-  - release
+#  - build
+#  - release
 
 before_script:
   - python -V
@@ -25,23 +25,19 @@ pre-commit:
   stage: test
   script: tox -e pre-commit
 
-yoshi:
-  stage: test
-  script: tox -e yoshi
-
-build:
-  stage: build
-  script: tox -e build
-  artifacts:
-    paths:
-    - dist/
-    expire_in: 1 month
-
-release:
-  stage: release
-  script: tox -e build
-  artifacts:
-    paths:
-    - dist
-  only:
-  - tags
+#build:
+#  stage: build
+#  script: tox -e build
+#  artifacts:
+#    paths:
+#    - dist/
+#    expire_in: 1 month
+#
+#release:
+#  stage: release
+#  script: tox -e build
+#  artifacts:
+#    paths:
+#    - dist
+#  only:
+#  - tags
