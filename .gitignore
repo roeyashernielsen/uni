@@ -116,4 +116,17 @@ mlruns
 
 #pycharm
 .idea/
+
+#Apple
+*.DS_Store
+
+#tox
+.tox
+.mypy_cache
+
+#build
+*.egg-info
+build
+dist
+
 # End of https://www.gitignore.io/api/python
