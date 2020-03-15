@@ -27,7 +27,7 @@ pre-commit:
 
 build:
   image: python:3.7
-  stage: version
+  stage: build
   script:
     - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
@@ -40,7 +40,7 @@ build:
 
 release:
   image: python:3.7
-  stage: version
+  stage: release
   script:
     - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
