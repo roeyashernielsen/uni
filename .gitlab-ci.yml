@@ -35,7 +35,10 @@ version:
     - git config --global user.email 'roey.asher@nielsen.com'
     - git config --global user.name 'roey.asher'
     - bump2version patch setup.py
-    - git push ci.skip
+    - git checkout -B branch
+    - change files
+    - git commit -m '[skip ci] commit from CI runner'
+    - git push origin branch
   only:
     - master
 
