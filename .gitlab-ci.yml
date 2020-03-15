@@ -2,10 +2,14 @@ image: python
 
 stages:
   - test
-  - build
+#  - build
+  - version
 #  - release
 
 before_script:
+  - git remote set-url origin https://roey.asher:${CI_PUSH_TOKEN}@gitlab.com/uni.git
+  - git config --global user.email 'roey.asher@nielsen.com'
+  - git config --global user.name 'roey.asher'
   - python -V
   - pip install pip --upgrade
   - pip install tox
@@ -25,9 +29,20 @@ pre-commit:
   stage: test
   script: tox -e pre-commit
 
-build:
-  stage: build
-  script: tox -e build
+version:
+  stage: version
+  script: tox -e bumpversion
+  only:
+  - master
+
+#build:
+#  stage: build
+#  script: tox -e build
+#  artifacts:
+#    paths:
+#    - dist/
+#    expire_in: 1 month
+
 
 #release:
 #  stage: release
