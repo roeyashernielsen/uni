@@ -34,7 +34,7 @@ build:
     - git config --global user.name 'roey.asher'
     - pip install bump2version
     - bump2version build
-    - git push origin development
+    - git push origin
   only:
     - development
 
@@ -47,7 +47,7 @@ release:
     - git config --global user.name 'roey.asher'
     - pip install bump2version
     - bump2version release
-    - git push origin master
+    - git push origin
   only:
     - master
 
