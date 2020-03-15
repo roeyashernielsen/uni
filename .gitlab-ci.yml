@@ -3,7 +3,7 @@ image: python
 stages:
   - test
   - build
-  - release
+#  - release
 
 before_script:
   - python -V
@@ -28,11 +28,6 @@ pre-commit:
 build:
   stage: build
   script: tox -e build
-  artifacts:
-    paths:
-    - dist/
-    expire_in: 1 month
-    onl
 
 #release:
 #  stage: release
