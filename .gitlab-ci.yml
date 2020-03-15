@@ -10,6 +10,7 @@ before_script:
   - python -V
   - pip install pip --upgrade
   - pip install tox
+  - pip install bump2version
 
 python37:
   image: python:3.7
@@ -28,7 +29,11 @@ pre-commit:
 
 version:
   stage: version
-  script: tox -e bumpversion
+  script:
+    git remote set-url origin https://roey.asher:${CI_PUSH_TOKEN}@gitlab.com/uni.git
+    git config --global user.email 'roey.asher@nielsen.com'
+    git config --global user.name 'roey.asher'
+    bump2version patch setup.py
   only:
   - master
 
