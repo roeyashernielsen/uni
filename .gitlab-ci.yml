@@ -27,10 +27,11 @@ pre-commit:
   script: tox -e pre-commit
 
 version:
+  image: python:3.7
   stage: version
   script:
     - pip install bump2version
-    - git remote set-url origin https://roey.asher:${CI_PUSH_TOKEN}@gitlab.com/uni.git
+    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
     - git config --global user.name 'roey.asher'
     - bump2version patch setup.py
