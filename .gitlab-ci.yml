@@ -36,6 +36,7 @@ version:
     - git config --global user.name 'roey.asher'
     - git checkout -B bumpversion
     - bump2version patch setup.py
+    - git add .
     - git commit -m '[skip ci] commit from ci user'
     - git push origin branch
   only:
