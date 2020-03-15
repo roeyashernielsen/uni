@@ -31,14 +31,15 @@ version:
   stage: version
   script:
     - pip install bump2version
-    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
-    - git config --global user.email 'roey.asher@nielsen.com'
-    - git config --global user.name 'roey.asher'
-    - git checkout -B bumpversion
     - bump2version patch setup.py
-    - git add .
-    - git commit -m '[skip ci] commit from ci user'
-    - git push origin branch
+    - git push
+#    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
+#    - git config --global user.email 'roey.asher@nielsen.com'
+#    - git config --global user.name 'roey.asher'
+#    - git checkout -B bumpversion
+#    - git add .
+#    - git commit -m '[skip ci] commit from ci user'
+#    - git push origin branch
   only:
     - master
 
