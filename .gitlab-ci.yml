@@ -37,7 +37,7 @@ version:
     - bump2version patch setup.py
     - git checkout -B branch
     - change files
-    - git commit -m '[skip ci] commit from CI runner'
+    - git commit -m '[skip ci] commit from ci user'
     - git push origin branch
   only:
     - master
