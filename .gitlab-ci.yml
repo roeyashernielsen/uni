@@ -33,8 +33,8 @@ build:
     - git remote set-url origin https://oauth2:$GIT_CI_PASS@gitlab.com/roey.asher/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
     - git config --global user.name 'roey.asher'
-    - git clone
-    - cd uni https://oauth2:$GIT_CI_PASS@gitlab.com/roey.asher/uni.git
+    - git clone https://oauth2:$GIT_CI_PASS@gitlab.com/roey.asher/uni.git
+    - cd uni
     - pip install bump2version
     - bump2version build
     - git push origin
