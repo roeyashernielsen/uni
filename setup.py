@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="uni",
-    version="0.0.0",
+    version="version='0.0.1',",
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=["uni"],
