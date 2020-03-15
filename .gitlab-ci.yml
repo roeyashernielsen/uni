@@ -38,7 +38,7 @@ build:
     - git clone -b ${CI_COMMIT_BRANCH} https://oauth2:${GIT_CI_PASS}@gitlab.com/roey.asher/uni.git
     - cd ${CI_PROJECT_NAME}
     - bump2version build
-    - git push origin ${CI_COMMIT_BRANCH}
+    - git push -o ci.skip origin ${CI_COMMIT_BRANCH}
   only:
     - development
 
@@ -54,7 +54,7 @@ release:
     - git clone -b ${CI_COMMIT_BRANCH} https://oauth2:${GIT_CI_PASS}@gitlab.com/roey.asher/uni.git
     - cd ${CI_PROJECT_NAME}
     - bump2version release
-    - git push origin ${CI_COMMIT_BRANCH}
+    - git push -o ci.skip origin ${CI_COMMIT_BRANCH}
   only:
     - master
 
