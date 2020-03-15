@@ -1,2 +1,2 @@
 """UNI version file."""
-VERSION = "0.0.0"
+VERSION = "version='1.0.0-dev0',"
