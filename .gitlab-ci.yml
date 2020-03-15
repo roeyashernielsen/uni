@@ -2,9 +2,8 @@ image: python
 
 stages:
   - test
-#  - build
-  - version
-#  - release
+  - build
+  - release
 
 before_script:
   - python -V
@@ -26,20 +25,29 @@ pre-commit:
   stage: test
   script: tox -e pre-commit
 
-version:
+build:
   image: python:3.7
   stage: version
   script:
+    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
+    - git config --global user.email 'roey.asher@nielsen.com'
+    - git config --global user.name 'roey.asher'
     - pip install bump2version
-    - bump2version patch setup.py
+    - bump2version build
     - git push
-#    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
-#    - git config --global user.email 'roey.asher@nielsen.com'
-#    - git config --global user.name 'roey.asher'
-#    - git checkout -B bumpversion
-#    - git add .
-#    - git commit -m '[skip ci] commit from ci user'
-#    - git push origin branch
+  only:
+    - development
+
+release:
+  image: python:3.7
+  stage: version
+  script:
+    - git remote set-url origin https://$GIT_CI_USER:$GIT_CI_PASS@gitlab.com/uni.git
+    - git config --global user.email 'roey.asher@nielsen.com'
+    - git config --global user.name 'roey.asher'
+    - pip install bump2version
+    - bump2version release
+    - git push
   only:
     - master
 
