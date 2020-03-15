@@ -9,4 +9,4 @@ repos:
     rev: v0.720
     hooks:
     -   id: mypy
-        exclude: ^(docs/|setup.py)
+#        exclude: ^(docs/|setup.py)
