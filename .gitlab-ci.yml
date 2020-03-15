@@ -29,7 +29,7 @@ build:
   image: python:3.7
   stage: build
   script:
-    - git remote set-url origin https://roey.asher:$GIT_CI_PASS@gitlab.com/uni.git
+    - git remote set-url origin https://oauth2:$GIT_CI_PASS@gitlab.com/roey.asher/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
     - git config --global user.name 'roey.asher'
     - pip install bump2version
@@ -42,7 +42,7 @@ release:
   image: python:3.7
   stage: release
   script:
-    - git remote set-url origin https://roey.asher:$GIT_CI_PASS@gitlab.com/uni.git
+    - git remote set-url origin https://oauth2:$GIT_CI_PASS@gitlab.com/roey.asher/uni.git
     - git config --global user.email 'roey.asher@nielsen.com'
     - git config --global user.name 'roey.asher'
     - pip install bump2version
