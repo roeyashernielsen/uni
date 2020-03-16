@@ -53,7 +53,7 @@ release:
     - git config --global user.name 'gitbot'
     - git clone -b ${CI_COMMIT_BRANCH} https://oauth2:${GIT_CI_PASS}@gitlab.com/roey.asher/uni.git
     - cd ${CI_PROJECT_NAME}
-    - bump2version release
+    - bump2version --tag release
     - git push -o ci.skip origin ${CI_COMMIT_BRANCH}
   only:
     - master
