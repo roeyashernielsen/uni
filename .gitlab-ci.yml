@@ -6,7 +6,6 @@ stages:
   - release
 
 before_script:
-  - echo $GIT_CI_PASS
   - python -V
   - pip install pip --upgrade
   - pip install tox
