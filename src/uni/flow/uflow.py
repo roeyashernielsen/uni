@@ -1,7 +1,7 @@
 """UNI Flow class."""
 import mlflow
 import prefect
-from src.uni.flow import ustep
+from ..flow import ustep
 
 
 class UFlow:

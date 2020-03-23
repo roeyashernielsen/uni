@@ -3,7 +3,7 @@ import functools
 
 import mlflow
 import prefect
-from src.uni.io import writer
+from ..io import writer
 
 TASK_PREFIX = "ustep_"
 
