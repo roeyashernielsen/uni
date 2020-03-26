@@ -8,11 +8,10 @@ import mlflow
 
 def save_obj(obj, name, path=None, **options):
     """
-    Saves the contents of the :class:`DataFrame` to a data source.
+    Saves the contents of the obj to a pickle file.
 
     In addition, log the file or directory as an artifact
     of the currently MLflow active run.
-    If no run is active, this method will create a new active run.
     """
     if path is None:
         path = tempfile.mkdtemp()
@@ -23,7 +22,7 @@ def save_obj(obj, name, path=None, **options):
         pickle.dump(obj, f)
 
     mlflow.log_artifact(file_path, name)
-    mlflow.log_param(name + "_path", mlflow.get_artifact_uri(name))
+    mlflow.log_param(name, mlflow.get_artifact_uri(name))
 
 
 def save_df(

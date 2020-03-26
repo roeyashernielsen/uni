@@ -1,11 +1,19 @@
 """UNI Step class."""
 import functools
+import inspect
 
 import mlflow
 import prefect
-from ..io import writer
+from prefect.engine.result_handlers import LocalResultHandler
+
+from ..io import writer, reader
+from .result_handler import UResultHandler
 
 TASK_PREFIX = "ustep_"
+
+
+def is_primitive(obj):
+    return not hasattr(obj, '__dict__')
 
 
 class UStep:
@@ -20,6 +28,36 @@ class UStep:
     def __call__(self, **kwargs):
         """Decorator."""
         return self.__mlflow_wrapper(nested=False, **kwargs)
+
+    def __get_req_params(self):
+        result = {}
+        flow = prefect.context.get("uflow", None)
+        if flow.flow:
+            for edge in flow.flow.edges:
+                if edge.downstream_task.name == self.name:
+                    result.update({edge.upstream_task.name: edge.key})
+        return result
+
+    def __fetch_req_params(self, req_params):
+        result = {}
+        for func_name, key in req_params.items():
+            result.update({key: reader.load_obj(f"{func_name}_return")})
+        return result
+
+    def __get_func_params(self, params):
+        result = {}
+        if params:
+            for param in inspect.signature(self.func).parameters:
+                if param in params:
+                    result.update({param: params[param]})
+        return result
+
+    def __get_params(self):
+        req_params = self.__get_req_params()
+        if req_params:
+            fetched_params = self.__fetch_req_params(req_params)
+            if fetched_params:
+                return self.__get_func_params(fetched_params)
 
     def __get_run_id(self):
         """Get task's MLflow run_id."""
@@ -47,16 +85,17 @@ class UStep:
                     run_id=self.__get_run_id(), run_name=self.name, nested=nested
             ):
                 for key, value in kwargs.items():
-                    mlflow.log_param(f"input_{key}", value)
+                    mlflow.log_param(f"input_param-{key}", value)
                 func_return = self.func(**kwargs)
-                writer.save_obj(func_return, self.name + "_return")
+                if is_primitive(func_return):
+                    mlflow.log_param(f"{self.name}_return", func_return)
 
         return func_return
 
     def step(self, run_id=None, **kwargs):
         """Step."""
 
-        @prefect.task(name=self.name)
+        @prefect.task(name=self.name, checkpoint=True, result_handler=UResultHandler(self.name))
         @functools.wraps(self.func)
         def wrapper(**kwargs):
             return self.__mlflow_wrapper(nested=True, **kwargs)

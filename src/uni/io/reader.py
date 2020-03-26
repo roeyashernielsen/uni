@@ -5,7 +5,7 @@ from urllib.parse import unquote, urlparse
 import prefect
 
 
-def load_obj(name=None, path=None, **options):
+def load_obj(name, file_path=None, **options):
     """
     Loads object.
 
@@ -13,11 +13,15 @@ def load_obj(name=None, path=None, **options):
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-    if path is None:
-        path = prefect.context.runs_md[name + "_path"]
-    with open(unquote(urlparse(path + f"/{name}.pkl").path), "rb") as file:
-        data = pickle.load(file)
-    return data
+    if file_path is None:
+        if "runs_md" in prefect.context.keys():
+            if name in prefect.context.runs_md:
+                with open(unquote(urlparse(prefect.context.runs_md[name] + f"/{name}.pkl").path), "rb") as file:
+                    return pickle.load(file)
+        return Exception
+    else:
+        with open(file_path, "rb") as file:
+            return pickle.load(file)
 
 # def load_df(name=None, path=None, format=None, schema=None, **options):
 #     """

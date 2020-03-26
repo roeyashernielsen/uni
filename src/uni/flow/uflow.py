@@ -28,6 +28,7 @@ class UFlow:
         """Trigger the exit function in Prefect flow."""
         self.flow.__exit__(None, None, None)
 
+    # TODO: should we move the creation of the run object in the step? (not need to share the run_id anymore)
     def __init_mlflow_runs(self):
         for task in self.flow.tasks:
             if task.name.startswith(ustep.TASK_PREFIX):
@@ -37,11 +38,17 @@ class UFlow:
 
     def run(self, start_step=None, end_step=None, backend=None):
         """Run the pipeline from start_step to end_step."""
-        with mlflow.start_run(run_name="Run #" + str(self.cnt)) as run:
+        with mlflow.start_run(run_name=f"Run #{self.cnt}") as run:
             self.mlflow_runs.update({self.flow_name: run.info.run_id})
             self.__init_mlflow_runs()
-            with prefect.context(runs=self.mlflow_runs):
-                self.flow.run()
+            with prefect.context(runs=self.mlflow_runs, uflow=self):
+                run_result = self.flow.run()
+        self.cnt += 1
+        return run_result
+
+    # TODO do we want to support state?
+    def show(self, filename=None):
+        self.flow.visualize(filename=filename)
 
     def run_step(self, step_name=None, backend=None):
         """Run a single step."""
