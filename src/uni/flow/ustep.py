@@ -88,7 +88,7 @@ class UStep:
                     mlflow.log_param(f"input_param-{key}", value)
                 func_return = self.func(**kwargs)
                 if is_primitive(func_return):
-                    mlflow.log_param(f"{self.name}_return", func_return)
+                    mlflow.log_param(f"return_value", func_return)
 
         return func_return
 
