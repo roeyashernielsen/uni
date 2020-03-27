@@ -1,16 +1,18 @@
 """
-Result Handlers provide the hooks that Prefect uses to store task results in production; a `ResultHandler` can be provided to a `Flow` at creation.
+Result Handlers to presist task results.
 
-Anytime a task needs its output or inputs stored, a result handler is used to determine where this data should be stored (and how it can be retrieved).
+Anytime a task needs its output or inputs stored,
+a result handler is used to determine where
+this data should be stored (and how it can be retrieved).
 """
 import os
 from typing import Any
 
+import mlflow
 import cloudpickle
 import pendulum
 from slugify import slugify
 
-import mlflow
 import prefect
 from prefect.engine.result_handlers import ResultHandler
 
@@ -32,11 +34,12 @@ class UResultHandler(ResultHandler):
     """
 
     def __init__(self, task_name, dir: str = None, validate: bool = True):
+        """UResultHandler constructor."""
         full_prefect_path = os.path.abspath(prefect.config.home_dir)
         if (
-                dir is None
-                or os.path.commonpath([full_prefect_path, os.path.abspath(dir)])
-                == full_prefect_path
+            dir is None
+            or os.path.commonpath([full_prefect_path, os.path.abspath(dir)])
+            == full_prefect_path
         ):
             directory = os.path.join(prefect.config.home_dir, "results")
         else:
@@ -52,7 +55,7 @@ class UResultHandler(ResultHandler):
         self.task_name = task_name
         super().__init__()
 
-    def read(self, fpath: str) -> Any:
+    def read(self, file_path: str) -> Any:
         """
         Read a result from the given file location.
 
@@ -62,10 +65,14 @@ class UResultHandler(ResultHandler):
         Returns:
             - the read result from the provided file
         """
-        self.logger.debug("Starting to read result from {}...".format(fpath))
-        with open(fpath, "rb") as f:
+        self.logger.debug(
+            "Starting to read result from {}...".format(file_path)
+        )
+        with open(file_path, "rb") as f:
             val = cloudpickle.loads(f.read())
-        self.logger.debug("Finished reading result from {}...".format(fpath))
+        self.logger.debug(
+            "Finished reading result from {}...".format(file_path)
+        )
         return val
 
     def write(self, result: Any) -> str:
@@ -78,11 +85,15 @@ class UResultHandler(ResultHandler):
         Returns:
             - str: the _absolute_ path to the written result on disk
         """
-        fname = self.task_name + "-result-" + slugify(pendulum.now("utc").isoformat())
-        loc = os.path.join(self.dir, fname)
+        file_name = (
+            self.task_name
+            + "-result-"
+            + slugify(pendulum.now("utc").isoformat())
+        )
+        loc = os.path.join(self.dir, file_name)
         self.logger.debug("Starting to upload result to {}...".format(loc))
         with open(loc, "wb") as f:
             f.write(cloudpickle.dumps(result))
         self.logger.debug("Finished uploading result to {}...".format(loc))
-        mlflow.log_artifact(loc, fname)
+        mlflow.log_artifact(loc, file_name)
         return loc

@@ -16,12 +16,20 @@ def load_obj(name, file_path=None, **options):
     if file_path is None:
         if "runs_md" in prefect.context.keys():
             if name in prefect.context.runs_md:
-                with open(unquote(urlparse(prefect.context.runs_md[name] + f"/{name}.pkl").path), "rb") as file:
+                with open(
+                    unquote(
+                        urlparse(
+                            prefect.context.runs_md[name] + f"/{name}.pkl"
+                        ).path
+                    ),
+                    "rb",
+                ) as file:
                     return pickle.load(file)
         return Exception
     else:
         with open(file_path, "rb") as file:
             return pickle.load(file)
+
 
 # def load_df(name=None, path=None, format=None, schema=None, **options):
 #     """

@@ -26,7 +26,7 @@ def save_obj(obj, name, path=None, **options):
 
 
 def save_df(
-        df, path=None, format=None, mode=None, partition_by=None, **options
+    df, path=None, format=None, mode=None, partition_by=None, **options
 ):
     """
     Saves the contents of the :class:`DataFrame` to a data source.
