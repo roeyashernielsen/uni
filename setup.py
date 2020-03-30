@@ -6,8 +6,7 @@ import os
 from setuptools import find_packages, setup
 
 spec = importlib.util.spec_from_file_location(
-    "uni.version",
-    os.path.join("src", "uni", "version.py")
+    "uni.version", os.path.join("src", "uni", "version.py")
 )
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
@@ -18,7 +17,12 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=["uni"],
-    install_requires=["click>=7.0", "mlflow", "prefect", "prefect[viz]"],
+    install_requires=[
+        "click>=7.0",
+        "mlflow",
+        "prefect[dev]",
+        "apache-airflow",
+    ],
     entry_points="""
             [console_scripts]
             uni=uni.cli:cli

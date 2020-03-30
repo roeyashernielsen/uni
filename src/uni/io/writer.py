@@ -24,14 +24,13 @@ def save_obj(obj, name, path=None, **options):
     mlflow.log_artifact(file_path, name)
     mlflow.log_param(name, mlflow.get_artifact_uri(name))
 
-
-def save_df(
-    df, path=None, format=None, mode=None, partition_by=None, **options
-):
-    """
-    Saves the contents of the :class:`DataFrame` to a data source.
-
-    In addition, log the file or directory as an artifact
-    of the currently MLflow active run.
-    If no run is active, this method will create a new active run.
-    """
+# def save_df(
+#     df, path=None, format=None, mode=None, partition_by=None, **options
+# ):
+#     """
+#     Saves the contents of the :class:`DataFrame` to a data source.
+#
+#     In addition, log the file or directory as an artifact
+#     of the currently MLflow active run.
+#     If no run is active, this method will create a new active run.
+#     """

@@ -8,13 +8,12 @@ this data should be stored (and how it can be retrieved).
 import os
 from typing import Any
 
-import mlflow
 import cloudpickle
+import mlflow
 import pendulum
-from slugify import slugify
-
 import prefect
 from prefect.engine.result_handlers import ResultHandler
+from slugify import slugify
 
 
 # TODO Add parquet support for DF
@@ -22,19 +21,21 @@ from prefect.engine.result_handlers import ResultHandler
 class UResultHandler(ResultHandler):
     """
     Hook for storing and retrieving task results from local file storage.
+
     Task results are written using `cloudpickle` and stored in the
     provided location for use in future runs.
 
     Args:
         - dir (str, optional): the _absolute_ path to a directory for storing
             all results; defaults to `${prefect.config.home_dir}/results`
-        - validate (bool, optional): a boolean specifying whether to validate the
-            provided directory path; if `True`, the directory will be converted to an
+        - validate (bool, optional): a boolean specifying whether to validate
+            the provided directory path; if `True`,
+            the directory will be converted to an
             absolute path and created.  Defaults to `True`
     """
 
     def __init__(self, task_name, dir: str = None, validate: bool = True):
-        """UResultHandler constructor."""
+        """THE UResultHandler constructor."""
         full_prefect_path = os.path.abspath(prefect.config.home_dir)
         if (
             dir is None
@@ -60,7 +61,8 @@ class UResultHandler(ResultHandler):
         Read a result from the given file location.
 
         Args:
-            - fpath (str): the _absolute_ path to the location of a written result
+            - fpath (str): the _absolute_ path to
+                the location of a written result
 
         Returns:
             - the read result from the provided file
