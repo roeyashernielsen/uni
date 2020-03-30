@@ -7,7 +7,7 @@ from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set
 from textwrap import dedent, indent
-from util import logger
+from utils import logger
 from collections import Counter
 
 
