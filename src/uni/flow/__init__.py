@@ -9,11 +9,11 @@ def is_primitive(obj):
     return not hasattr(obj, "__dict__")
 
 
-def get_runs_params(ti, func_param):
+def get_runs_params(task_instance, func_param):
     """Get return value from MLflow run object."""
     result = {}
     for func_name, param in func_param:
-        run_id = ti.xcom_pull(task_ids=func_name)
+        run_id = task_instance.xcom_pull(task_ids=func_name)
         run_md = mlflow.tracking.MlflowClient().get_run(run_id)
         value = run_md.data.params.get(func_name, None)
         if isinstance(value, str) and value.startswith("file://"):
@@ -24,11 +24,11 @@ def get_runs_params(ti, func_param):
 def get_params_from_pre_tasks(**kwargs):
     """Get return values from prev-functions."""
     if "ti" in kwargs:
-        ti = kwargs["ti"]
+        task_instance = kwargs["ti"]
     else:
         raise Exception("Couldn't find ti in kwargs")
 
     func_param = kwargs.get("func_param", None)
     if func_param:
-        return get_runs_params(ti, func_param)
+        return get_runs_params(task_instance, func_param)
     return {}

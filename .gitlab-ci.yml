@@ -20,11 +20,6 @@ linters:
   stage: test
   script: tox -e linters
 
-pre-commit:
-  image: python:3.7
-  stage: test
-  script: tox -e pre-commit
-
 build:
   image: python:3.7
   stage: build

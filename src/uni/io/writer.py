@@ -6,7 +6,7 @@ import tempfile
 import mlflow
 
 
-def save_obj(obj, name, path=None, **options):
+def save_obj(obj, name, path=None):
     """
     Saves the contents of the obj to a pickle file.
 
@@ -18,8 +18,8 @@ def save_obj(obj, name, path=None, **options):
 
     file_path = os.path.join(path, name + ".pkl")
 
-    with open(file_path, "wb") as f:
-        pickle.dump(obj, f)
+    with open(file_path, "wb") as file:
+        pickle.dump(obj, file)
 
     mlflow.log_artifact(file_path, name)
     mlflow.log_param(name, mlflow.get_artifact_uri(name))
