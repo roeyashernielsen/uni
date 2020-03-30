@@ -1,7 +1,7 @@
 """Tests for verifying functionality of UNI flow converter application."""
 
 from pathlib import Path
-from uni_flow_converter import converter
+from src.uni import converter
 from prefect import Flow as flow_type
 import filecmp
 import pytest
