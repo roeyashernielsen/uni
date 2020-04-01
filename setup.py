@@ -22,6 +22,7 @@ setup(
         "mlflow",
         "prefect[dev]",
         "apache-airflow",
+        "pendulum==1.4.4",
     ],
     entry_points="""
             [console_scripts]

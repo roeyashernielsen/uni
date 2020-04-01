@@ -70,8 +70,8 @@ class UResultHandler(ResultHandler):
         self.logger.debug(
             "Starting to read result from {}...".format(file_path)
         )
-        with open(file_path, "rb") as f:
-            val = cloudpickle.loads(f.read())
+        with open(file_path, "rb") as file:
+            val = cloudpickle.loads(file.read())
         self.logger.debug(
             "Finished reading result from {}...".format(file_path)
         )
@@ -88,14 +88,14 @@ class UResultHandler(ResultHandler):
             - str: the _absolute_ path to the written result on disk
         """
         file_name = (
-            self.task_name
-            + "-result-"
-            + slugify(pendulum.now("utc").isoformat())
+                self.task_name
+                + "-result-"
+                + slugify(pendulum.now("utc").isoformat())
         )
         loc = os.path.join(self.dir, file_name)
         self.logger.debug("Starting to upload result to {}...".format(loc))
-        with open(loc, "wb") as f:
-            f.write(cloudpickle.dumps(result))
+        with open(loc, "wb") as file:
+            file.write(cloudpickle.dumps(result))
         self.logger.debug("Finished uploading result to {}...".format(loc))
         mlflow.log_artifact(loc, file_name)
         return loc
