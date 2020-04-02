@@ -3,7 +3,7 @@ import pickle
 from urllib.parse import unquote, urlparse
 
 
-def load_obj(name, file_path):
+def load_obj(file_path, name):
     """
     Loads object.
 

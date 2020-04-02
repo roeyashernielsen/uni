@@ -7,7 +7,7 @@ from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set
 from textwrap import dedent, indent
-from utils import logger
+from .utils import logger
 from collections import Counter
 
 
@@ -53,7 +53,7 @@ def create_task_name_map(flow: Any) -> Dict[int, str]:
 
 
 def write_imports(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
+        flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write import statements of dag definition file."""
     with open(dag_definition_path, "w") as dag_definition_file:
@@ -67,6 +67,7 @@ def write_imports(
             from datetime import datetime
             from airflow import DAG
             from airflow.operators.python_operator import PythonOperator
+            from uni.flow import init_step
             from {flow_definition_name} import (
         """
 
@@ -82,7 +83,7 @@ def write_imports(
 
 
 def write_dag_configuration(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
+        flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dag configuration statements of dag definition file."""
     with open(dag_definition_path, "a") as dag_definition_file:
@@ -106,7 +107,7 @@ def write_dag_configuration(
 
 
 def get_func_params(
-    edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
+        edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
 ) -> Dict[str, str]:
     """Record upstream tasks and passed parameters for each task."""
     result = {}
@@ -116,24 +117,41 @@ def get_func_params(
     return result
 
 
+def get_const_params(task, constants):
+    if task in constants:
+        return constants[task]
+    return {}
+
+
 def write_operator_definitions(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
+        flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write airflow operator statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
     task_name_map = create_task_name_map(flow)
 
     with open(dag_definition_path, "a") as dag_definition_file:
+        # Write init operator
+        operator_str = (
+            f"init = PythonOperator("
+            f"task_id='init', "
+            f"python_callable=init_step, "
+            "provide_context=True"
+            ")\n"
+        )
+        dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 4))
         # Write airflow operator statements
         for task in flow.tasks:
             labeled_task_name = task_name_map[id(task)]
             func_params = get_func_params(flow.edges, labeled_task_name, task_name_map)
+            const_params = get_const_params(task, flow.constants)
             operator_str = (
                 f"{labeled_task_name} = PythonOperator("
                 f"task_id='{labeled_task_name}', "
-                f"python_callable={task.name}, "
+                f"python_callable={task.name}.airflow_step, "
                 f"op_kwargs={{'name': '{labeled_task_name}', "
-                f"'func_param': {func_params}}}, "
+                f"'func_param': {func_params}, "
+                f"'const_params': {const_params}}}, "
                 "provide_context=True"
                 ")\n"
             )
@@ -142,7 +160,7 @@ def write_operator_definitions(
 
 
 def write_dependency_definitions(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
+        flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dependency definition statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
@@ -150,6 +168,10 @@ def write_dependency_definitions(
 
     with open(dag_definition_path, "a") as dag_definition_file:
         # Write dependency definition statements using bitshift operator API in airflow
+        for task in flow.flow.root_tasks():
+            labeled_task_name = task_name_map[id(task)]
+            edge_str = f"init >> {labeled_task_name}\n"
+            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
         for edge in flow.edges:
             labeled_task_name = task_name_map[id(edge.upstream_task)]
             labeled_downstream_task_name = task_name_map[id(edge.downstream_task)]
@@ -158,7 +180,7 @@ def write_dependency_definitions(
 
 
 def write_dag_file(
-    flow: Any, dag_definition_path: Path, flow_definition_path: Path
+        flow: Any, dag_definition_path: Path, flow_definition_path: Path
 ) -> None:
     """Generate python file containing dag definition using flow object."""
     write_imports(flow, flow_definition_path, dag_definition_path)
