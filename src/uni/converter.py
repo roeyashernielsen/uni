@@ -16,7 +16,9 @@ from utils import logger
 from collections import Counter
 
 
-def load_pipeline_object(pipeline_definition_path: Path) -> Any:
+def load_pipeline_object(
+    pipeline_definition_path: Path, pipeline_object_name: str
+) -> Any:
     """Extract Pipeline object from pipeline definition file."""
     try:
         global_vars = run_path(pipeline_definition_path)
@@ -24,8 +26,14 @@ def load_pipeline_object(pipeline_definition_path: Path) -> Any:
         logger.error(
             "Flow definition file contains errors. Cannot convert", reraise=True
         )
-    else:
-        return global_vars["flow"]
+
+    try:
+        return global_vars[pipeline_object_name]
+    except KeyError:
+        logger.error(
+            "Provided name for pipeline object does not match pipeline definition file",
+            reraise=True,
+        )
 
 
 def create_task_name_map(pipeline: Any) -> Dict[int, str]:
@@ -201,6 +209,13 @@ def write_dag_file(
 @click.command()
 @click.argument("pipeline_definition_path", type=click.Path(exists=True))
 @click.option(
+    "--pipeline-object-name",
+    "-p",
+    default="pipeline",
+    show_default=True,
+    help="name of pipeline object defined in pipeline definition file",
+)
+@click.option(
     "--dag-definition-path",
     "-d",
     default="dag.py",
@@ -208,13 +223,15 @@ def write_dag_file(
     help="location of .py file containing airflow dag definition",
     type=click.Path(resolve_path=True),
 )
-def cli(pipeline_definition_path: str, dag_definition_path: str) -> None:
+def cli(
+    pipeline_definition_path: str, dag_definition_path: str, pipeline_object_name: str
+) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing pipeline definition."""
     # Convert string paths into OS-agnostic Path objects
     pipeline_definition_path = Path(pipeline_definition_path)
     dag_definition_path = Path(dag_definition_path)
 
-    pipeline = load_pipeline_object(pipeline_definition_path)
+    pipeline = load_pipeline_object(pipeline_definition_path, pipeline_object_name)
     write_dag_file(pipeline, dag_definition_path, pipeline_definition_path)
 
     # Process output file through black autoformatter
