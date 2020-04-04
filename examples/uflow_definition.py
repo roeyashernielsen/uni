@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 import pandas as pd
-from uni.flow.uflow import Pipeline
+from uni.core.pipeline import Pipeline
 from uni.flow.ustep import UStep
 
 
