@@ -14,25 +14,25 @@ class Pipeline(Flow):
     by mlflow automatically.
     """
 
-    def __init__(self, name=None, experiment_name=None):
+    def __init__(self, pipeline_name=None, experiment_name=None):
         """Instantiate new Pipeline object."""
-        super().__init__(name)
+        super().__init__(pipeline_name)
 
         # Initialize how many times the pipeline is executed
-        self.run_cnt = 0
+        self.run_count = 0
 
         # Append pipeline to an existing mlflow experiment, otherwise create new mlflow
         # experiment
         if experiment_name is not None:
             mlflow.set_experiment(experiment_name)
         else:
-            mlflow.set_experiment(self.name)
+            mlflow.set_experiment(pipeline_name)
 
     def run(self):
         """Execute entire pipeline while recording artifacts."""
-        with mlflow.start_run(run_name=f"Run #{self.run_cnt}"):
+        with mlflow.start_run(run_name=f"Run #{self.run_count}"):
             run_result = super().run()
-        self.run_cnt += 1
+        self.run_count += 1
         return run_result
 
     # TODO do we want to support state?
