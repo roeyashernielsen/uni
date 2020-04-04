@@ -55,7 +55,7 @@ def export_model(model: np.array, path: str, **kwargs) -> None:
 
 
 # Doesn't work without specify the param
-with UFlow("example_flow") as flow:
+with UFlow("example_flow") as pipeline:
     rand = get_rand.step()
     data = get_dataABC.step(rand=rand)
     target_variable = get_dataXYZ.step(rand=rand)
