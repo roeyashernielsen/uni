@@ -58,7 +58,7 @@ def create_task_name_map(pipeline: Any) -> Dict[int, str]:
 
 
 def write_imports(
-        pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
+    pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write import statements of dag definition file."""
     with open(dag_definition_path, "w") as dag_definition_file:
@@ -88,7 +88,7 @@ def write_imports(
 
 
 def write_dag_configuration(
-        pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
+    pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dag configuration statements of dag definition file."""
     with open(dag_definition_path, "a") as dag_definition_file:
@@ -112,7 +112,7 @@ def write_dag_configuration(
 
 
 def get_func_params(
-        edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
+    edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
 ) -> Dict[str, str]:
     """Record upstream tasks and passed parameters for each task."""
     result = {}
@@ -129,7 +129,7 @@ def get_const_params(task, constants):
 
 
 def write_operator_definitions(
-        pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
+    pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write airflow operator statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
@@ -148,7 +148,9 @@ def write_operator_definitions(
         # Write airflow operator statements
         for task in pipeline.tasks:
             labeled_task_name = task_name_map[id(task)]
-            func_params = get_func_params(pipeline.edges, labeled_task_name, task_name_map)
+            func_params = get_func_params(
+                pipeline.edges, labeled_task_name, task_name_map
+            )
             const_params = get_const_params(task, pipeline.constants)
             operator_str = (
                 f"{labeled_task_name} = PythonOperator("
@@ -165,7 +167,7 @@ def write_operator_definitions(
 
 
 def write_dependency_definitions(
-        pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
+    pipeline: Any, pipeline_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dependency definition statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
@@ -185,13 +187,15 @@ def write_dependency_definitions(
 
 
 def write_dag_file(
-        pipeline: Any, dag_definition_path: Path, pipeline_definition_path: Path
+    pipeline: Any, dag_definition_path: Path, pipeline_definition_path: Path
 ) -> None:
     """Generate python file containing dag definition using Pipeline object."""
     write_imports(pipeline, pipeline_definition_path, dag_definition_path)
     write_dag_configuration(pipeline, pipeline_definition_path, dag_definition_path)
     write_operator_definitions(pipeline, pipeline_definition_path, dag_definition_path)
-    write_dependency_definitions(pipeline, pipeline_definition_path, dag_definition_path)
+    write_dependency_definitions(
+        pipeline, pipeline_definition_path, dag_definition_path
+    )
 
 
 @click.command()
