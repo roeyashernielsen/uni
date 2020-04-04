@@ -168,7 +168,7 @@ def write_dependency_definitions(
 
     with open(dag_definition_path, "a") as dag_definition_file:
         # Write dependency definition statements using bitshift operator API in airflow
-        for task in flow.flow.root_tasks():
+        for task in flow.root_tasks():
             labeled_task_name = task_name_map[id(task)]
             edge_str = f"init >> {labeled_task_name}\n"
             dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
