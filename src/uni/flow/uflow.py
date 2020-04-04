@@ -35,10 +35,5 @@ class Pipeline(Flow):
         self.run_count += 1
         return run_result
 
-    # TODO do we want to support state?
-    def show(self, filename=None):
-        """Display a visual representation of pipeline."""
-        return super().visualize(filename=filename)
-
     def resume(self, run_id=None, backend=None):
         """Resume execution of a previous run of pipeline."""
