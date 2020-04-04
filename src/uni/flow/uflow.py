@@ -35,5 +35,5 @@ class Pipeline(Flow):
         self.run_count += 1
         return run_result
 
-    def resume(self, run_id=None, backend=None):
+    # def resume(self, run_id=None, backend=None):
         """Resume execution of a previous run of pipeline."""
