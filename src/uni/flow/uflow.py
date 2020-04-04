@@ -1,9 +1,9 @@
 """Package contain UNI Pipeline class."""
 import mlflow
-from prefect import Flow
+import prefect
 
 
-class Pipeline(Flow):
+class Pipeline(prefect.Flow):
     """
     The Pipeline object contains tasks that must be completed in a specified order.
 
@@ -14,7 +14,7 @@ class Pipeline(Flow):
     by mlflow automatically.
     """
 
-    def __init__(self, pipeline_name=None, experiment_name=None):
+    def __init__(self, pipeline_name: str = None, experiment_name: str = None):
         """Instantiate new Pipeline object."""
         super().__init__(pipeline_name)
 
@@ -28,7 +28,7 @@ class Pipeline(Flow):
         else:
             mlflow.set_experiment(pipeline_name)
 
-    def run(self):
+    def run(self) -> "prefect.engine.state.State":
         """Execute entire pipeline while recording artifacts."""
         with mlflow.start_run(run_name=f"Run #{self.run_count}"):
             run_result = super().run()
