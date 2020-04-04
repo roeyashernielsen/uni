@@ -121,3 +121,6 @@ ipython_config.py
 # serialized files
 *.pkl
 *.pickle
+
+# mlflow run directory
+mlruns/
