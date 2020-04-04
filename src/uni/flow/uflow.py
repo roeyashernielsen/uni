@@ -23,7 +23,7 @@ class Pipeline(Flow):
 
         # Append pipeline to an existing mlflow experiment, otherwise create new mlflow
         # experiment
-        if experiment_name is not None:
+        if experiment_name:
             mlflow.set_experiment(experiment_name)
         else:
             mlflow.set_experiment(pipeline_name)
