@@ -74,11 +74,15 @@ def write_imports(
 
         # Assemble import statements
         imports_str = f"""\
-            from datetime import datetime
+            from datetime import datetime, timedelta
             from airflow import DAG
-            from airflow.operators.python_operator import PythonOperator
+            from dss_airflow_utils.operators.python_operator import PythonOperator
+            from dss_airflow_utils.dag_factory import dag_factory
+            from dss_airflow_utils.workspace_utils import path_in_workspace
+            from dss_airflow_utils.utils import get_config
+            from dss_datacache_client import client
             from uni.flow import init_step
-            from {flow_definition_name} import (
+            from lib.{flow_definition_name} import (
         """
 
         # Assemble unique task names
