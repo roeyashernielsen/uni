@@ -1,7 +1,7 @@
 """Submodule containing flow utils."""
 import mlflow
 
-from ..io.reader import load_obj
+from ..io.reader import load_py_obj
 
 
 def is_primitive(obj):
@@ -17,7 +17,7 @@ def get_runs_params(task_instance, func_param):
         run_md = mlflow.get_run(run_id)
         value = run_md.data.params.get(func_name, None)
         if isinstance(value, str) and value.startswith("file://"):
-            result.update({param: load_obj(value, func_name)})
+            result.update({param: load_py_obj(value, func_name)})
     return result
 
 

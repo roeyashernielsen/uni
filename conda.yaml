@@ -4,12 +4,15 @@ channels:
 dependencies:
   - python=3.7
   - pandas
+  - numpy
+  - pyarrow
   - scikit-learn
   - jupyter
   - pip
   - pip:
-      - pendulum==1.4.4
       - mlflow
       - prefect[dev]
       - apache-airflow
+      - pendulum==1.4.4
+      - pyspark
       - tox

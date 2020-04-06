@@ -21,11 +21,14 @@ class UStep:
 
     def __call__(self, **kwargs):
         """Trigger the step as a regular function with MLflow wrapping."""
-        return self.__mlflow_wrapper(nested=False, **kwargs)
+        if prefect.context.get("flow", None):
+            return self.step(**kwargs)
+        else:
+            return self.func(**kwargs)
 
     def run(self, **kwargs):
         """Trigger the step as a regular function."""
-        return self.func(**kwargs)
+        return self.__mlflow_wrapper(nested=False, **kwargs)
 
     def __mlflow_wrapper(self, nested=None, airflow_step=False, **kwargs):
         """Start MLflow run and log the input/output."""
@@ -46,7 +49,7 @@ class UStep:
             mlflow.log_param(f"return_value", func_return)
 
         if airflow_step:
-            writer.save_obj(func_return, self._name)
+            writer.save_py_obj(func_return, self._name)
             mlflow.end_run()
             mlflow.end_run()
             return run.info.run_id
