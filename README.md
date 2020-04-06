@@ -2,12 +2,12 @@
 
 ## Contents
 
-- [UNI flow converter](#converter)
+- [Flow converter](#converter)
 
 <a name="converter"></a>
-## UNI flow converter
+## Flow converter
 
-UNI flow converter is a tool to convert a python file containing a Prefect flow definition into a new python file containing an Airflow DAG definition. The converter dynamically extracts the necessary information from a Prefect `flow` object&mdash;it does not parse the input python file.
+Flow converter (`src/uni/converter.py`) is a tool to convert a Python file containing a flow definition into a new Python file containing an Airflow DAG definition. The input flow may be defined using either an UNI UFlow or Prefect Flow.
 
 ### Installation and usage
 
@@ -21,15 +21,21 @@ conda env create -f conda.yml
 ```
 source activate uni
 ```
-5. Execute following command from top-level directory of repository to perform conversion
+5. Install UNI
 ```
-python src/uni/converter.py <input-file-path> --dag-definition-path <output-file-path>
+pip install -e . -U
+```
+5. Perform conversion by executing command from top-level directory of repository
+```
+python src/uni/converter.py <input-flow-path> -f <flow-object-name> -d <output-dag-path>
 ```
 
-- `<input-file-path>` refers to path of python file containing a Prefect flow definition
+- `<input-flow-path>` refers to path of Python file containing the flow definition
 
-- `<output-file-path>` refers to path of python file where the resulting converted python file will be stored. The default path is `dag.py`.
+- `<flow-object-name`> refers to variable name of the flow object defined in flow definition file (typically in the `with` statement). The default value is `flow`.
+
+- `<output-file-path>` refers to path of resulting Python file containing the converted Airflow DAG definition. The default path is `dag.py`.
 
 ### Examples
 
-Example python files containing Prefect flow definitions (and their resulting converted dag definition files) can be found in the directory `examples`.
+Example Python files containing flow definitions can be found in the directory `examples`. Flow definitions written using Prefect Flow are `flow_definition.py` and `flow_definition_2.py`. Flow definition written using UNI UFlow is `uflow_definition.py`.

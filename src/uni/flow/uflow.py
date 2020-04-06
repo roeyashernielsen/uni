@@ -1,31 +1,41 @@
-"""UNI Flow class."""
+"""Package contains UNI UFlow class for creating, executing, and recording flows."""
 import mlflow
-from prefect import Flow
+import prefect
 
 
-class UFlow(Flow):
-    """Main class from which all pipelines should inherit."""
+class UFlow(prefect.Flow):
+    """
+    UFlow object is a flow containing tasks and their order of execution.
 
-    def __init__(self, name=None, experiment_name=None):
-        """Init UNI flow."""
-        self.run_cnt = 0
-        super().__init__(name)
-        if experiment_name is not None:
+    This object enables a user to define and execute a flow using standard python code
+    (via the Prefect library). In addition, each execution of a flow is recorded using
+    the MLFlow library and its tracking API. Repeated executions of the same flow are
+    organized as nested runs within an MLFlow experiment. Artifacts of each executed
+    task are stored as individual MLFlow runs within a nested run. This extended
+    functionality is provided as a convenience to the user and also used by UNI for
+    converting a UFlow object into other objects such as an Airflow DAG object.
+    """
+
+    def __init__(self, flow_name: str = None, experiment_name: str = None):
+        """Instantiate UFlow object."""
+        super().__init__(flow_name)
+
+        # Initialize how many times the flow is executed
+        self.run_count = 0
+
+        # Append flow to an existing MLflow experiment, otherwise create new MLflow
+        # experiment
+        if experiment_name:
             mlflow.set_experiment(experiment_name)
         else:
-            mlflow.set_experiment(self.name)
+            mlflow.set_experiment(flow_name)
 
-    def run(self):
-        """Run the pipeline from start_step to end_step."""
-        with mlflow.start_run(run_name=f"Run #{self.run_cnt}"):
+    def run(self) -> "prefect.engine.state.State":
+        """Execute flow while recording its execution and artifacts using MLFlow."""
+        with mlflow.start_run(run_name=f"Run #{self.run_count}"):
             run_result = super().run()
-        self.run_cnt += 1
+        self.run_count += 1
         return run_result
 
-    # TODO do we want to support state?
-    def show(self, filename=None):
-        """Print the flow."""
-        return super().visualize(filename=filename)
-
-    def resume(self, run_id=None, backend=None):
-        """Resume execution of a previous run of this pipeline."""
+    # def resume(self, run_id=None, backend=None):
+    #    """Resume execution of a previous run of flow."""
