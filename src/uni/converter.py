@@ -1,4 +1,8 @@
-"""Tool for converting prefect flow definition file into airflow dag definition file."""
+"""
+Tool for converting flow definition file into Airflow dag definition file.
+
+The input flow may be defined using either an UNI UFlow or Prefect Flow.
+"""
 
 import click
 import subprocess
@@ -12,7 +16,7 @@ from collections import Counter
 
 
 def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
-    """Extract flow object from prefect flow definition file."""
+    """Extract flow object from flow definition file."""
     try:
         global_vars = run_path(flow_definition_path)
     except Exception:
@@ -124,6 +128,7 @@ def get_func_params(
 
 
 def get_const_params(task, constants):
+    """Record values of constant parameters, if any, for a task."""
     if task in constants:
         return constants[task]
     return {}
@@ -137,16 +142,18 @@ def write_operator_definitions(
     task_name_map = create_task_name_map(flow)
 
     with open(dag_definition_path, "a") as dag_definition_file:
-        # Write init operator
-        operator_str = (
+        # Write operator statement for init task that records each root task as an
+        # MLflow run
+        init_operator_str = (
             f"init = PythonOperator("
             f"task_id='init', "
             f"python_callable=init_step, "
             "provide_context=True"
             ")\n"
         )
-        dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 4))
-        # Write airflow operator statements
+        dag_definition_file.write(indent(dedent(init_operator_str), prefix=" " * 4))
+
+        # Write remaining operator statements
         for task in flow.tasks:
             labeled_task_name = task_name_map[id(task)]
             func_params = get_func_params(flow.edges, labeled_task_name, task_name_map)
@@ -172,12 +179,15 @@ def write_dependency_definitions(
     # Retrieve hash map of task memory address to labeled task name
     task_name_map = create_task_name_map(flow)
 
+    # Write dependency definition statements using bitshift operator API in airflow
     with open(dag_definition_path, "a") as dag_definition_file:
-        # Write dependency definition statements using bitshift operator API in airflow
+        # Add an init task dependency to each root task
         for task in flow.root_tasks():
             labeled_task_name = task_name_map[id(task)]
             edge_str = f"init >> {labeled_task_name}\n"
             dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
+
+        # Add remaining dependencies
         for edge in flow.edges:
             labeled_task_name = task_name_map[id(edge.upstream_task)]
             labeled_downstream_task_name = task_name_map[id(edge.downstream_task)]
@@ -215,7 +225,7 @@ def write_dag_file(
 def cli(
     flow_definition_path: str, dag_definition_path: str, flow_object_name: str
 ) -> None:
-    """FLOW_DEFINITION_PATH: location of .py file containing prefect flow definition."""
+    """FLOW_DEFINITION_PATH: location of .py file containing flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
     dag_definition_path = Path(dag_definition_path)
