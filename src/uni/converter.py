@@ -11,7 +11,7 @@ from utils import logger
 from collections import Counter
 
 
-def load_flow_object(flow_definition_path: Path) -> Any:
+def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
     """Extract flow object from prefect flow definition file."""
     try:
         global_vars = run_path(flow_definition_path)
@@ -19,8 +19,14 @@ def load_flow_object(flow_definition_path: Path) -> Any:
         logger.error(
             "Flow definition file contains errors. Cannot convert", reraise=True
         )
-    else:
-        return global_vars["flow"]
+
+    try:
+        return global_vars[flow_object_name]
+    except KeyError:
+        logger.error(
+            "Provided name for flow object does not match flow definition file",
+            reraise=True,
+        )
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
@@ -199,13 +205,21 @@ def write_dag_file(
     help="location of .py file containing airflow dag definition",
     type=click.Path(resolve_path=True),
 )
-def cli(flow_definition_path: str, dag_definition_path: str) -> None:
+@click.option(
+    "--flow-object-name",
+    "-f",
+    default="flow",
+    show_default=True,
+    help="name of flow object defined in flow definition file",
+)
+
+def cli(flow_definition_path: str, dag_definition_path: str, flow_object_name: str) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing prefect flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
     dag_definition_path = Path(dag_definition_path)
 
-    flow = load_flow_object(flow_definition_path)
+    flow = load_flow_object(flow_definition_path, flow_object_name)
     write_dag_file(flow, dag_definition_path, flow_definition_path)
 
     # Process output file through black autoformatter
