@@ -59,7 +59,7 @@ def create_task_name_map(flow: Any) -> Dict[int, str]:
 
 
 def write_imports(
-        flow: Any, flow_definition_path: Path, dag_definition_path: Path
+    flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write import statements of dag definition file."""
     with open(dag_definition_path, "w") as dag_definition_file:
@@ -89,7 +89,7 @@ def write_imports(
 
 
 def write_dag_configuration(
-        flow: Any, flow_definition_path: Path, dag_definition_path: Path
+    flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dag configuration statements of dag definition file."""
     with open(dag_definition_path, "a") as dag_definition_file:
@@ -113,7 +113,7 @@ def write_dag_configuration(
 
 
 def get_func_params(
-        edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
+    edges: Set, labeled_task_name: str, task_name_map: Dict[int, str]
 ) -> Dict[str, str]:
     """Record upstream tasks and passed parameters for each task."""
     result = {}
@@ -130,7 +130,7 @@ def get_const_params(task, constants):
 
 
 def write_operator_definitions(
-        flow: Any, flow_definition_path: Path, dag_definition_path: Path
+    flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write airflow operator statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
@@ -166,7 +166,7 @@ def write_operator_definitions(
 
 
 def write_dependency_definitions(
-        flow: Any, flow_definition_path: Path, dag_definition_path: Path
+    flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
     """Dynamically write dependency definition statements of dag definition file."""
     # Retrieve hash map of task memory address to labeled task name
@@ -186,7 +186,7 @@ def write_dependency_definitions(
 
 
 def write_dag_file(
-        flow: Any, dag_definition_path: Path, flow_definition_path: Path
+    flow: Any, dag_definition_path: Path, flow_definition_path: Path
 ) -> None:
     """Generate python file containing dag definition using flow object."""
     write_imports(flow, flow_definition_path, dag_definition_path)
@@ -212,8 +212,9 @@ def write_dag_file(
     show_default=True,
     help="name of flow object defined in flow definition file",
 )
-
-def cli(flow_definition_path: str, dag_definition_path: str, flow_object_name: str) -> None:
+def cli(
+    flow_definition_path: str, dag_definition_path: str, flow_object_name: str
+) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing prefect flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
