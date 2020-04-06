@@ -1,4 +1,4 @@
-"""Package contain UNI Pipeline class."""
+"""Package contains UNI UFlow class for creating, executing, and recording pipelines."""
 import mlflow
 import prefect
 
