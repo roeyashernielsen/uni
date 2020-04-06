@@ -2,12 +2,12 @@
 
 ## Contents
 
-- [Pipeline converter](#converter)
+- [Flow converter](#converter)
 
 <a name="converter"></a>
-## Pipeline converter
+## Flow converter
 
-Pipeline converter (`src/uni/converter.py`) is a tool to convert a python file containing a pipeline definition into a new python file containing an Airflow (vanilla) DAG definition. The input pipeline may be defined using either the UNI Pipeline API or the Prefect API.
+Flow converter (`src/uni/converter.py`) is a tool to convert a Python file containing a flow definition into a new Python file containing an Airflow DAG definition. The input flow may be defined using either an UNI UFlow or Prefect Flow.
 
 ### Installation and usage
 
@@ -25,17 +25,17 @@ source activate uni
 ```
 pip install -e . -U
 ```
-5. Execute following command from top-level directory of repository to perform conversion
+5. Perform conversion by executing command from top-level directory of repository
 ```
-python src/uni/converter.py <input-file-path> --pipeline-object-name <pipeline-obj-name> --dag-definition-path <output-file-path>
+python src/uni/converter.py <input-flow-path> -f <flow-object-name> -d <output-dag-path>
 ```
 
-- `<input-file-path>` refers to path of python file containing a pipeline definition
+- `<input-flow-path>` refers to path of Python file containing the flow definition
 
-- `<pipeline-obj-name`> refers to python variable name of the pipeline object defined in pipeline definition file. The default name is `pipeline`.
+- `<flow-object-name`> refers to variable name of the flow object defined in flow definition file (typically in the `with` statement). The default value is `flow`.
 
-- `<output-file-path>` refers to path of python file where the resulting converted python file will be stored. The default path is `dag.py`.
+- `<output-file-path>` refers to path of resulting Python file containing the converted Airflow DAG definition. The default path is `dag.py`.
 
 ### Examples
 
-Example python files containing pipeline definitions can be found in the directory `examples`. Pipeline definitions written using the Prefect API are `flow_definition.py` and `flow_definition_2.py`. Pipeline definition written using the UNI Pipeline API is `uni_pipeline_definition.py`.
+Example Python files containing flow definitions can be found in the directory `examples`. Flow definitions written using Prefect Flow are `flow_definition.py` and `flow_definition_2.py`. Flow definition written using UNI UFlow is `uflow_definition.py`.
