@@ -1,5 +1,4 @@
 import random
-
 import numpy as np
 import pandas as pd
 from uni.flow.uflow import UFlow
@@ -7,20 +6,20 @@ from uni.flow.ustep import UStep
 
 
 @UStep
-def get_rand(**kwargs) -> pd.DataFrame:
+def get_rand(**kwargs) -> int:
     rand = random.randint(0, 100)
     return rand
 
 
 @UStep
 def get_dataABC(rand, **kwargs) -> pd.DataFrame:
-    data = pd.DataFrame(np.arange(12).reshape(3, 4), columns=['A', 'B', 'C', 'D'])
+    data = pd.DataFrame(np.arange(12).reshape(3, 4), columns=["A", "B", "C", "D"])
     return data
 
 
 @UStep
 def get_dataXYZ(rand, **kwargs) -> pd.DataFrame:
-    data = pd.DataFrame(np.arange(3).reshape(3, 1), columns=['X'])
+    data = pd.DataFrame(np.arange(3).reshape(3, 1), columns=["X"])
     return data
 
 
@@ -31,7 +30,9 @@ def clean_data(table: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
 
 @UStep
-def generate_features(table1: pd.DataFrame, table2: pd.DataFrame, **kwargs) -> pd.DataFrame:
+def generate_features(
+    table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
+) -> pd.DataFrame:
     features = pd.concat((table1, table2), axis=1)
     return features
 
@@ -54,7 +55,7 @@ def export_model(model: np.array, path: str, **kwargs) -> None:
 
 
 # Doesn't work without specify the param
-with UFlow('example_flow') as flow:
+with UFlow("example_flow") as flow:
     rand = get_rand.step()
     data = get_dataABC.step(rand=rand)
     target_variable = get_dataXYZ.step(rand=rand)
@@ -63,5 +64,5 @@ with UFlow('example_flow') as flow:
     features = generate_features.step(table1=data, table2=target_variable)
     model1 = train_model_RED.step(features=features)
     model2 = train_model_ROEY.step(features=features)
-    export_model.step(model=model1, path='model1.csv')
-    export_model.step(model=model2, path='model2.csv')
+    export_model.step(model=model1, path="model1.csv")
+    export_model.step(model=model2, path="model2.csv")
