@@ -115,7 +115,12 @@ def write_dag_configuration(
             "'request_memory': '16G',"
             "'request_cpu': '4',"
             "'worker_type': 'python3.7-worker',}"
-            "}\n"
+            "}\n\n"
+        )
+
+        create_dag_function_str = (
+            "@dag_factory\n"
+            "def create_dag():"
         )
 
         with_statement_str = f"""
@@ -126,7 +131,8 @@ def write_dag_configuration(
 
         # Write dag configuration statements
         dag_definition_file.write(dedent(default_args_str))
-        dag_definition_file.write(dedent(with_statement_str))
+        dag_definition_file.write(dedent(create_dag_function_str))
+        dag_definition_file.write(indent(dedent(with_statement_str), prefix=" " * 4))
 
 
 def get_func_params(
@@ -164,7 +170,7 @@ def write_operator_definitions(
             "provide_context=True"
             ")\n"
         )
-        dag_definition_file.write(indent(dedent(init_operator_str), prefix=" " * 4))
+        dag_definition_file.write(indent(dedent(init_operator_str), prefix=" " * 8))
 
         # Write remaining operator statements
         for task in flow.tasks:
@@ -181,7 +187,7 @@ def write_operator_definitions(
                 "provide_context=True"
                 ")\n"
             )
-            dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 8))
         dag_definition_file.write("\n")
 
 
