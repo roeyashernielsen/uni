@@ -106,7 +106,16 @@ def write_dag_configuration(
 
         # Assemble dag configuration statements
         default_args_str = (
-            "default_args = {'owner': 'red', 'start_date': datetime(2017, 3, 20)}\n"
+            "default_args = {"
+            "'owner': 'red',"
+            "'start_date': datetime(2017, 3, 20),"
+            "'retries': 0,"
+            "'retry_delay': timedelta(seconds=10),"
+            "'queue': {"
+            "'request_memory': '16G',"
+            "'request_cpu': '4',"
+            "'worker_type': 'python3.7-worker',}"
+            "}\n"
         )
 
         with_statement_str = f"""
