@@ -51,6 +51,7 @@ class UStep:
             mlflow.end_run()
             return run.info.run_id
         else:
+            mlflow.end_run()
             return func_return
 
     def step(self, **kwargs):
