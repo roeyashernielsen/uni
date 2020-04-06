@@ -9,7 +9,7 @@ import subprocess
 from re import search as re_search
 from pathlib import Path
 from runpy import run_path
-from typing import Any, Dict, Set
+from typing import Any, Dict, Set, DefaultDict
 from textwrap import dedent, indent
 from utils import logger
 from collections import Counter
@@ -127,7 +127,7 @@ def get_func_params(
     return result
 
 
-def get_const_params(task, constants):
+def get_const_params(task: Any, constants: DefaultDict) -> Dict:
     """Record values of constant parameters, if any, for a task."""
     if task in constants:
         return constants[task]
