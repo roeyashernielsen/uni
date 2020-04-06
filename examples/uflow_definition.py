@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 import pandas as pd
-from uni.flow.uflow import Pipeline
+from uni.flow.uflow import UFlow
 from uni.flow.ustep import UStep
 
 
@@ -54,7 +54,7 @@ def export_model(model: np.array, path: str, **kwargs) -> None:
 
 
 # Doesn't work without specify the param
-with Pipeline('example_flow') as flow:
+with UFlow('example_flow') as flow:
     rand = get_rand.step()
     data = get_dataABC.step(rand=rand)
     target_variable = get_dataXYZ.step(rand=rand)
