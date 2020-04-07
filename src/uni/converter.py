@@ -114,7 +114,7 @@ def write_dag_configuration(
             "'queue': {"
             "'request_memory': '16G',"
             "'request_cpu': '4',"
-            "'worker_type': 'python3.7-worker',}"
+            "'worker_type': 'spark2.4.4-python3.7-worker',}"
             "}\n\n"
         )
 
