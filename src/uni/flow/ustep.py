@@ -49,7 +49,7 @@ class UStep:
             mlflow.log_param(f"return_value", func_return)
 
         if airflow_step:
-            writer.save_py_obj(func_return, self._name)
+            writer.save(obj=func_return, name=self._name, mlflow_logging=True)
             mlflow.end_run()
             mlflow.end_run()
             return run.info.run_id
@@ -61,9 +61,7 @@ class UStep:
         """The step decorator."""
 
         @prefect.task(
-            name=self._name,
-            checkpoint=True,
-            result_handler=UResultHandler(self._name),
+            name=self._name, checkpoint=True, result_handler=UResultHandler(self._name),
         )
         @functools.wraps(self.func)
         def wrapper(**kwargs):
@@ -80,7 +78,7 @@ class UStep:
         @functools.wraps(self.func)
         def wrapper(**kwargs):
             return self.__mlflow_wrapper(
-                nested=True, airflow_step=True, **get_params_from_pre_tasks(**kwargs)
+                nested=True, airflow_step=True, **get_params_from_pre_tasks(**kwargs),
             )
 
         return wrapper(**kwargs)

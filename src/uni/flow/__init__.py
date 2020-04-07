@@ -1,11 +1,11 @@
 """Submodule containing flow utils."""
 import mlflow
 
-from ..io.reader import load_py_obj
+from ..utils.mlflow import load_artifact
 
 
 def is_primitive(obj):
-    """Check if the object is "primitive"."""
+    """Check if object is "primitive"."""
     return not hasattr(obj, "__dict__")
 
 
@@ -14,10 +14,7 @@ def get_runs_params(task_instance, func_param):
     result = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
     for func_name, param in func_param.items():
         run_id = task_instance.xcom_pull(task_ids=func_name)
-        run_md = mlflow.get_run(run_id)
-        value = run_md.data.params.get(func_name, None)
-        if isinstance(value, str) and value.startswith("file://"):
-            result.update({param: load_py_obj(value, func_name)})
+        result.update({param: load_artifact(run_id, func_name)})
     return result
 
 
@@ -33,6 +30,7 @@ def get_params_from_pre_tasks(**kwargs):
 
 
 def init_step(**kwargs):
+    """Airflow init step."""
     run = mlflow.start_run(run_name=f'{kwargs["dag"].dag_id}_{kwargs["run_id"]}')
     mlflow.end_run()
-    kwargs['ti'].xcom_push(key='mlflow_run_id', value=run.info.run_id)
+    kwargs["ti"].xcom_push(key="mlflow_run_id", value=run.info.run_id)

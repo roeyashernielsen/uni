@@ -17,7 +17,7 @@ from slugify import slugify
 
 
 # TODO Add parquet support for DF
-# TODO Do we want to stay wth cloudpickle
+# TODO Do we want to stay wth cloudpickle?
 class UResultHandler(ResultHandler):
     """
     Hook for storing and retrieving task results from local file storage.
@@ -67,14 +67,10 @@ class UResultHandler(ResultHandler):
         Returns:
             - the read result from the provided file
         """
-        self.logger.debug(
-            "Starting to read result from {}...".format(file_path)
-        )
+        self.logger.debug("Starting to read result from {}...".format(file_path))
         with open(file_path, "rb") as file:
             val = cloudpickle.loads(file.read())
-        self.logger.debug(
-            "Finished reading result from {}...".format(file_path)
-        )
+        self.logger.debug("Finished reading result from {}...".format(file_path))
         return val
 
     def write(self, result: Any) -> str:
@@ -88,9 +84,7 @@ class UResultHandler(ResultHandler):
             - str: the _absolute_ path to the written result on disk
         """
         file_name = (
-                self.task_name
-                + "-result-"
-                + slugify(pendulum.now("utc").isoformat())
+            self.task_name + "-result-" + slugify(pendulum.now("utc").isoformat())
         )
         loc = os.path.join(self.dir, file_name)
         self.logger.debug("Starting to upload result to {}...".format(loc))
