@@ -204,14 +204,14 @@ def write_dependency_definitions(
         for task in flow.root_tasks():
             labeled_task_name = task_name_map[id(task)]
             edge_str = f"init >> {labeled_task_name}\n"
-            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 8))
 
         # Add remaining dependencies
         for edge in flow.edges:
             labeled_task_name = task_name_map[id(edge.upstream_task)]
             labeled_downstream_task_name = task_name_map[id(edge.downstream_task)]
             edge_str = f"{labeled_task_name} >> {labeled_downstream_task_name}\n"
-            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 8))
 
 
 def write_dag_file(
