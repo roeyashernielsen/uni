@@ -8,7 +8,7 @@ from uni.flow.ustep import UStep
 
 
 @UStep
-def get_rand(**kwargs) -> pd.DataFrame:
+def get_rand(**kwargs) -> int:
     rand = random.randint(0, 100)
     return rand
 
