@@ -213,6 +213,9 @@ def write_dependency_definitions(
             edge_str = f"{labeled_task_name} >> {labeled_downstream_task_name}\n"
             dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 8))
 
+        # Add return statement for create_dag() function
+        dag_definition_file.write(indent(dedent("\nreturn dag"), prefix=" " * 8))
+
 
 def write_dag_file(
     flow: Any, dag_definition_path: Path, flow_definition_path: Path
