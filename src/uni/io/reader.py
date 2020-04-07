@@ -2,19 +2,25 @@
 import pickle
 import os
 
-from urllib.parse import unquote, urlparse
+from urllib.parse import urlparse
 
 import cloudpickle
 import pandas as pd
 
-from ..io import PyObjFileFormat, TabularFileFormats
+from ..io import PyObjFileFormat, TabularFileFormats, ObjType
 from ..utils.spark import spark
 
 
-def load_py_obj(file_path,
-                file_name=None,
-                file_format=PyObjFileFormat.Pickle,
-                mlflow_artifact=True):
+def load(path, obj_type=None):
+    if obj_type == ObjType.PandasDF:
+        return load_pd_df(df_path=path)
+    elif obj_type == ObjType.SparkDF:
+        return load_spark_df(df_path=path)
+    else:
+        return load_py_obj(obj_path=path)
+
+
+def load_py_obj(obj_path, file_format=PyObjFileFormat.Pickle):
     """
     Loads object.
 
@@ -22,16 +28,12 @@ def load_py_obj(file_path,
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-    if file_name:
-        file_path = os.path.join(file_path, file_name)
-    if mlflow_artifact:
-        file_path = unquote(urlparse(file_path).path)
 
-    with open(file_path, "rb") as file:
-        if file_path.endswith(PyObjFileFormat.Pickle.value) \
+    with open(urlparse(obj_path).path, "rb") as file:
+        if obj_path.endswith(PyObjFileFormat.Pickle.value) \
                 or file_format == PyObjFileFormat.Pickle:
             return pickle.load(file)
-        elif file_path.endswith(PyObjFileFormat.CloudPickle.value) \
+        elif obj_path.endswith(PyObjFileFormat.CloudPickle.value) \
                 or file_format == PyObjFileFormat.CloudPickle:
             return cloudpickle.load(file)
         else:
@@ -39,10 +41,8 @@ def load_py_obj(file_path,
 
 
 def load_pd_df(df_path,
-               df_name=None,
                columns=None,
                file_format=TabularFileFormats.Parquet,
-               mlflow_artifact=True,
                **kwargs):
     """
     Loads object.
@@ -51,10 +51,6 @@ def load_pd_df(df_path,
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-    if df_name:
-        df_path = os.path.join(df_path, df_name)
-    if mlflow_artifact:
-        df_path = unquote(urlparse(df_path).path)
 
     if df_path.endswith(TabularFileFormats.Parquet.value) \
             or file_format == TabularFileFormats.Parquet:
@@ -67,11 +63,7 @@ def load_pd_df(df_path,
 
 
 def load_spark_df(df_path,
-                  df_name=None,
-                  columns=None,
-                  file_format=TabularFileFormats.Parquet,
-                  mlflow_artifact=True,
-                  **kwargs):
+                  file_format=TabularFileFormats.Parquet):
     """
     Loads object.
 
@@ -79,10 +71,6 @@ def load_spark_df(df_path,
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-    if df_name:
-        df_path = os.path.join(df_path, df_name)
-    if mlflow_artifact:
-        df_path = unquote(urlparse(df_path).path)
 
     if file_format == TabularFileFormats.Parquet:
         return spark.read.parquet(df_path)

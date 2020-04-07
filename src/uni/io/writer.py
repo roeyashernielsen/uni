@@ -3,24 +3,35 @@ import os
 import pickle
 import tempfile
 
-import mlflow
 import pandas as pd
 import cloudpickle
 import pyspark.sql as ssql
 
-from ..io import PyObjFileFormat, TabularFileFormats
+from ..io import PyObjFileFormat, TabularFileFormats, ObjType, PathType
+from ..utils.mlflow import ArtifactMD, log_artifact
 
 
-def _get_file_path(file_name, dir_path):
+def _get_file_path(name, extension=None, dir_path=None):
     if dir_path is None:
-        return os.path.join(tempfile.mkdtemp(), file_name)
+        dir_path = tempfile.mkdtemp()
+    if extension is not None:
+        name = name + extension
+    return os.path.join(dir_path, name)
+
+
+def save(obj, name, dir_path=None, mlflow_logging=True):
+    """Save obj."""
+    if isinstance(obj, pd.DataFrame):
+        return save_pd_df(df=obj, df_name=name, dir_path=dir_path, mlflow_logging=mlflow_logging)
+    elif isinstance(obj, ssql.DataFrame):
+        return save_spark_df(df=obj, df_name=name, dir_path=dir_path, mlflow_logging=mlflow_logging)
     else:
-        return os.path.join(dir_path, file_name)
+        return save_py_obj(obj=obj, obj_name=name, dir_path=dir_path, mlflow_logging=mlflow_logging)
 
 
 def save_py_obj(
         obj,
-        name,
+        obj_name,
         dir_path=None,
         file_format=PyObjFileFormat.Pickle,
         mlflow_logging=True
@@ -31,10 +42,9 @@ def save_py_obj(
     In addition, log the file or directory as an artifact
     of the currently MLflow active run.
     """
-    file_name = name + file_format.value
-    file_path = _get_file_path(file_name, dir_path)
+    path = _get_file_path(name=obj_name, extension=file_format.value, dir_path=dir_path)
 
-    with open(file_path, "wb") as file:
+    with open(path, "wb") as file:
         if file_format == PyObjFileFormat.Pickle:
             pickle.dump(obj, file)
         elif file_format == PyObjFileFormat.CloudPickle:
@@ -43,10 +53,17 @@ def save_py_obj(
             raise ValueError(f"file_format must be a PyObjFileFormat but got {type(file_format)}")
 
     if mlflow_logging:
-        mlflow.log_artifact(file_path, name)
-        mlflow.log_param(name, mlflow.get_artifact_uri(name))
+        log_artifact(
+            ArtifactMD(
+                name=obj_name,
+                path=path,
+                path_type=PathType.File,
+                obj_type=ObjType.PyObj.value,
+                file_format=file_format.value
+            )
+        )
 
-    return file_path
+    return path
 
 
 def save_pd_df(
@@ -68,21 +85,27 @@ def save_pd_df(
     if not isinstance(df, pd.DataFrame):
         raise ValueError(f"df must be a Pandas DataFrame but got {type(df)}")
 
-    file_name = df_name + file_format.value
-    file_path = _get_file_path(file_name, dir_path)
+    path = _get_file_path(name=df_name, extension=file_format.value, dir_path=dir_path)
 
     if file_format == TabularFileFormats.Parquet:
-        df.to_parquet(path=file_path, engine="pyarrow", partition_cols=partition_by, **kwargs)
+        df.to_parquet(path=path, engine="pyarrow", partition_cols=partition_by, **kwargs)
     elif file_format == TabularFileFormats.Feather:
-        df.to_feather(path=file_path, **kwargs)
+        df.to_feather(path=path, **kwargs)
     else:
         raise ValueError(f"file_format must be a TabularFileFormats but got {type(file_format)}")
 
     if mlflow_logging:
-        mlflow.log_artifact(file_path, df_name)
-        mlflow.log_param(df_name, mlflow.get_artifact_uri(df_name))
+        log_artifact(
+            ArtifactMD(
+                name=df_name,
+                path=path,
+                path_type=PathType.File,
+                obj_type=ObjType.PandasDF.value,
+                file_format=file_format.value
+            )
+        )
 
-    return file_path
+    return path
 
 
 def save_spark_df(
@@ -92,7 +115,6 @@ def save_spark_df(
         partition_by=None,
         file_format=TabularFileFormats.Parquet,
         mlflow_logging=True,
-        **kwargs
 ):
     """
     Saves the contents of the :class:`DataFrame` to a data source.
@@ -104,15 +126,24 @@ def save_spark_df(
     if not isinstance(df, ssql.DataFrame):
         raise ValueError(f"df must be a Spark DataFrame but got {type(df)}")
 
-    path = _get_file_path(df_name, dir_path)
+    path = _get_file_path(name=df_name, dir_path=dir_path)
 
     if file_format == TabularFileFormats.Parquet:
         df.write.parquet(path=path, mode="overwrite", partitionBy=partition_by, compression="snappy")
+        # TODO add support with stempView
+        # df.createOrReplaceTempView(df_name)
     else:
         raise ValueError(f"file_format must be a TabularFileFormats but got {type(file_format)}")
 
     if mlflow_logging:
-        mlflow.log_artifacts(path, df_name)
-        mlflow.log_param(df_name, mlflow.get_artifact_uri(df_name))
+        log_artifact(
+            ArtifactMD(
+                name=df_name,
+                path=path,
+                path_type=PathType.Directory,
+                obj_type=ObjType.SparkDF.value,
+                file_format=file_format.value
+            )
+        )
 
     return path

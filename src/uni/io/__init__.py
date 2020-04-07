@@ -1,5 +1,7 @@
 """Submodule containing io utils."""
 from enum import Enum
+import pandas as pd
+import pyspark.sql as ssql
 
 
 class ExtendedEnum(Enum):
@@ -23,3 +25,14 @@ class PyObjFileFormat(ExtendedEnum):
     # # TODO to impl
     # JSON = ".json"
     # YAML = ".yaml"
+
+
+class ObjType(ExtendedEnum):
+    PandasDF = "PandasDataFrame"
+    SparkDF = "SparkDataFrame"
+    PyObj = "PyObj"
+
+
+class PathType(ExtendedEnum):
+    File = "file"
+    Directory = "directory"
