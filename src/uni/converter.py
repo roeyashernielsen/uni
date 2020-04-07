@@ -118,10 +118,7 @@ def write_dag_configuration(
             "}\n\n"
         )
 
-        create_dag_function_str = (
-            "@dag_factory\n"
-            "def create_dag():"
-        )
+        create_dag_function_str = "@dag_factory\ndef create_dag():"
 
         with_statement_str = f"""
             with DAG(
