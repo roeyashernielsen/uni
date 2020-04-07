@@ -3,12 +3,14 @@ import random
 import numpy as np
 import pandas as pd
 
+import pyspark.sql as ssql
 from uni.flow.uflow import UFlow
 from uni.flow.ustep import UStep
+from uni.utils.spark import get_spark_session
 
 
 @UStep
-def get_rand(**kwargs) -> pd.DataFrame:
+def get_rand(**kwargs) -> int:
     rand = random.randint(0, 100)
     return rand
 
@@ -33,7 +35,7 @@ def clean_data(table: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
 @UStep
 def generate_features(
-    table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
+        table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
 ) -> pd.DataFrame:
     features = pd.concat((table1, table2), axis=1)
     return features
@@ -41,19 +43,21 @@ def generate_features(
 
 @UStep
 def train_model_RED(features: pd.DataFrame, **kwargs) -> np.array:
-    arr = pd.DataFrame([1, 3, 5, 7])
-    return arr
+    spark = get_spark_session()
+    df = spark.createDataFrame(features)
+    return df
 
 
 @UStep
 def train_model_ROEY(features: pd.DataFrame, **kwargs) -> np.array:
-    arr = pd.DataFrame([2, 4, 6, 8])
-    return arr
+    spark = get_spark_session()
+    df = spark.createDataFrame(features)
+    return df
 
 
 @UStep
-def export_model(model: np.array, path: str, **kwargs) -> None:
-    model.to_csv(path, index=False)
+def export_model(model: ssql.DataFrame, path: str, **kwargs) -> None:
+    model.write.csv(path)
 
 
 # Doesn't work without specify the param

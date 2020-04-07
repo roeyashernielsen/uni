@@ -23,8 +23,11 @@ setup(
         "prefect[dev]",
         "apache-airflow",
         "pendulum==1.4.4",
+        "cloudpickle",
         "pyarrow",
-        "pyspark", 'cloudpickle', 'pandas'
+        "pyspark",
+        "pandas",
+        "numpy",
     ],
     entry_points="""
             [console_scripts]
