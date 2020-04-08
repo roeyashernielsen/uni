@@ -78,9 +78,6 @@ def write_imports(
             from airflow import DAG
             from dss_airflow_utils.operators.python_operator import PythonOperator
             from dss_airflow_utils.dag_factory import dag_factory
-            from dss_airflow_utils.workspace_utils import path_in_workspace
-            from dss_airflow_utils.utils import get_config
-            from dss_datacache_client import client
             from .lib.uni.flow import init_step
             from .lib.{flow_definition_name} import (
         """
