@@ -81,8 +81,8 @@ def write_imports(
             from dss_airflow_utils.workspace_utils import path_in_workspace
             from dss_airflow_utils.utils import get_config
             from dss_datacache_client import client
-            from uni.flow import init_step
-            from lib.{flow_definition_name} import (
+            from .lib.uni.flow import init_step
+            from .lib.{flow_definition_name} import (
         """
 
         # Assemble unique task names
