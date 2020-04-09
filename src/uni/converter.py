@@ -56,46 +56,31 @@ def create_task_name_map(flow: Any) -> Dict[int, str]:
     return task_name_map
 
 
-def write_imports(
+def write_dag_configuration(
     flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
-    """Dynamically write import statements of dag definition file."""
+    """Dynamically write dag configuration statements of dag definition file."""
     with open(dag_definition_path, "w") as dag_definition_file:
+        # Extract name of pipeline
+        dag_id = flow.name
+
         # Extract filename sans extension from path of flow definition file
         flow_definition_name = re_search(
             r"[\w-]+?(?=\.)", flow_definition_path.as_posix()
         ).group(0)
 
-        # Assemble import statements
-        imports_str = f"""\
+        # Assemble unique task names
+        task_names = set(task.name for task in flow.tasks)
+
+        # Assemble top-level import statements
+        imports_str = """\
             from datetime import datetime, timedelta
             from airflow import DAG
             from dss_airflow_utils.operators.python_operator import PythonOperator
             from dss_airflow_utils.dag_factory import dag_factory
-            from .lib.uni.flow import init_step
-            from .lib.{flow_definition_name} import (
         """
 
-        # Assemble unique task names
-        task_names = set(task.name for task in flow.tasks)
-
-        # Write import statements
-        dag_definition_file.write(dedent(imports_str))
-        for task_name in sorted(task_names):
-            task_name_str = f"{task_name},\n"
-            dag_definition_file.write(indent(dedent(task_name_str), prefix=" " * 4))
-        dag_definition_file.write(")\n\n")
-
-
-def write_dag_configuration(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
-) -> None:
-    """Dynamically write dag configuration statements of dag definition file."""
-    with open(dag_definition_path, "a") as dag_definition_file:
-        # Extract name of pipeline
-        dag_id = flow.name
-
-        # Assemble dag configuration statements
+        # Assemble default argument configuration statements
         default_args_str = (
             "default_args = {"
             "'owner': 'red',"
@@ -106,21 +91,35 @@ def write_dag_configuration(
             "'request_memory': '16G',"
             "'request_cpu': '4',"
             "'worker_type': 'spark2.4.4-python3.7-worker',}"
-            "}\n\n"
+            "}\n"
         )
 
+        # Assemble dag definition statements
         create_dag_function_str = "@dag_factory\ndef create_dag():"
-
         with_statement_str = f"""
             with DAG(
                 dag_id='{dag_id}', schedule_interval=None, default_args=default_args
             ) as dag:
         """
 
+        # Assemble UNI-related import statements
+        uni_imports_str = f"""
+            from .lib.uni.flow import init_step
+            from .lib.{flow_definition_name} import (
+        """
+
         # Write dag configuration statements
+        dag_definition_file.write(dedent(imports_str))
         dag_definition_file.write(dedent(default_args_str))
         dag_definition_file.write(dedent(create_dag_function_str))
         dag_definition_file.write(indent(dedent(with_statement_str), prefix=" " * 4))
+
+        # Write UNI-related import statements
+        dag_definition_file.write(indent(dedent(uni_imports_str), prefix=" " * 8))
+        for task_name in sorted(task_names):
+            task_name_str = f"{task_name},\n"
+            dag_definition_file.write(indent(dedent(task_name_str), prefix=" " * 8))
+        dag_definition_file.write(")\n")
 
 
 def get_func_params(
@@ -209,7 +208,6 @@ def write_dag_file(
     flow: Any, dag_definition_path: Path, flow_definition_path: Path
 ) -> None:
     """Generate python file containing dag definition using flow object."""
-    write_imports(flow, flow_definition_path, dag_definition_path)
     write_dag_configuration(flow, flow_definition_path, dag_definition_path)
     write_operator_definitions(flow, flow_definition_path, dag_definition_path)
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
