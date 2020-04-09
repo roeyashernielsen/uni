@@ -11,7 +11,6 @@ from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set, DefaultDict
 from textwrap import dedent, indent
-from utils import logger
 from collections import Counter
 
 
@@ -20,17 +19,12 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
     try:
         global_vars = run_path(flow_definition_path)
     except Exception:
-        logger.error(
-            "Flow definition file contains errors. Cannot convert", reraise=True
-        )
+        click.echo("Flow definition file contains errors. Cannot convert")
 
     try:
         return global_vars[flow_object_name]
     except KeyError:
-        logger.error(
-            "Provided name for flow object does not match flow definition file",
-            reraise=True,
-        )
+        click.echo("Provided name for flow object does not match flow definition file")
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
