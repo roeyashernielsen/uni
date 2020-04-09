@@ -21,10 +21,12 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
     except Exception:
         click.echo("Flow definition file contains errors. Cannot convert")
 
-    try:
+    if flow_object_name in global_vars:
         return global_vars[flow_object_name]
-    except KeyError:
-        click.echo("Provided name for flow object does not match flow definition file")
+    else:
+        raise KeyError(
+            "Provided name for flow object does not match flow definition file"
+        )
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
