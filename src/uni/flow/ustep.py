@@ -1,13 +1,9 @@
 """UNI Step class."""
 
 import functools
-
 import mlflow
-import prefect
-
 from ..io import writer
 from . import get_params_from_pre_tasks, is_primitive
-from .result_handler import UResultHandler
 
 
 class UStep:
@@ -56,6 +52,8 @@ class UStep:
 
     def step(self, **kwargs):
         """The step decorator."""
+        import prefect
+        from .result_handler import UResultHandler
 
         @prefect.task(
             name=self._name,
