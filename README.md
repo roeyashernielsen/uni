@@ -15,11 +15,11 @@ Flow converter (`src/uni/converter.py`) is a tool to convert a Python file conta
 2. Open a terminal window and navigate to the repository directory
 3. Install dependencies via conda (can be installed via [Miniconda](https://docs.conda.io/en/latest/miniconda.html)):
 ```
-conda env create -f conda.yml
+conda env create -f conda.yaml
 ```
 4. Activate virtual environment
 ```
-source activate uni
+conda activate uni
 ```
 5. Install UNI
 ```
