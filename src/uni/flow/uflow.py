@@ -30,10 +30,10 @@ class UFlow(prefect.Flow):
         else:
             mlflow.set_experiment(flow_name)
 
-    def run(self) -> "prefect.engine.state.State":
+    def run(self, **kwargs) -> "prefect.engine.state.State":
         """Execute flow while recording its execution and artifacts using MLFlow."""
         with mlflow.start_run(run_name=f"Run #{self.run_count}"):
-            run_result = super().run()
+            run_result = super().run(**kwargs)
         self.run_count += 1
         return run_result
 

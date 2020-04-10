@@ -41,9 +41,8 @@ and logs at the DEBUG level are only sent to log files (if configured).
 
 import logging
 import sys
-from pathlib import Path
 from datetime import datetime
-
+from pathlib import Path
 
 # Set up root logger at lowest logging level; if this were logging.INFO then log
 # statements at lower levels (DEBUG) would be ignored.
@@ -52,7 +51,7 @@ logger.setLevel(logging.DEBUG)
 
 # Set up default format for log messages
 base_formatter = logging.Formatter(
-    fmt='%(asctime)s [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    fmt="%(asctime)s [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
 )
 
 # Configure stream logging at INFO level by default, but only if there is not already
@@ -66,13 +65,13 @@ if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
 
 def set_file_sink(name: str):
     """Set up file sink with provided name and current timestamp."""
-    if not Path('logs/').exists():
-        Path('logs/').mkdir()
+    if not Path("logs/").exists():
+        Path("logs/").mkdir()
 
-    timestamp = datetime.now().strftime(f'%Y_%m_%d_%H%M%S')
+    timestamp = datetime.now().strftime(f"%Y_%m_%d_%H%M%S")
 
     # Create a new FileHandler and configure it separately
-    file_handler = logging.FileHandler(filename=f'logs/{name}_{timestamp}.log')
+    file_handler = logging.FileHandler(filename=f"logs/{name}_{timestamp}.log")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(base_formatter)
     logger.addHandler(file_handler)
