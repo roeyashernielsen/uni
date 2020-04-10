@@ -1,7 +1,8 @@
 """
-Tool for converting flow definition file into Airflow dag definition file.
+Tool for converting flow definition file into IS-compatible Airflow dag definition file.
 
-The input flow may be defined using either an UNI UFlow or Prefect Flow.
+The input flow may be defined using either an UNI UFlow or Prefect Flow. The output
+DAG can be placed in the dag directory of an IS recipe and is ready to be executed.
 """
 
 import click
