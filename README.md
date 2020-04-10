@@ -7,7 +7,34 @@
 <a name="converter"></a>
 ## Flow converter
 
-Flow converter (`src/uni/converter.py`) is a tool to convert a Python file containing a flow definition into a new Python file containing an Airflow DAG definition. The input flow may be defined using either an UNI UFlow or Prefect Flow.
+Flow converter (`src/uni/converter.py`) is a tool for converting a Python file containing a flow definition into a new Python file containing an Airflow dag definition. The resulting dag definition file is ready to be used in a recipe within Intelligence studio _without any modification_.
+
+### Introduction
+
+A flow definition file contains a set of tasks&mdash;each a standard Python function prefixed with the `@UStep` decorator. Function signatures must contain the argument `**kwargs`. Tasks support working with Spark DataFrames via pySpark. 
+
+Flow dependency definitions should be placed below the task definitions, constructed using `UFlow`, and written in standard Python. Function calls must use keyword arguments. 
+
+A simple flow definition file:
+
+```python
+from uni.flow.uflow import UFlow
+from uni.flow.ustep import UStep
+
+# Define tasks
+@UStep
+def task1(**kwargs):
+    return "hello"
+
+@UStep
+def task2(arg1, **kwargs):
+    print(arg1 + " world")
+
+# Define task dependencies
+with UFlow("my_flow") as flow:
+    result = task1()
+    task2(arg1=result)
+```
 
 ### Installation and usage
 
@@ -36,6 +63,9 @@ python src/uni/converter.py <input-flow-path> -f <flow-object-name> -d <output-d
 
 - `<output-file-path>` refers to path of resulting Python file containing the converted Airflow DAG definition. The default path is `dag.py`.
 
+Store dag definition file in directory `dag/` of recipe. Store input flow definition file in directory `dag/lib` of recipe.
+
+<a name="examples"></a>
 ### Examples
 
-Example Python files containing flow definitions can be found in the directory `examples`. Flow definitions written using Prefect Flow are `flow_definition.py` and `flow_definition_2.py`. Flow definition written using UNI UFlow is `uflow_definition.py`.
+Example flow definition files can be found in the directory `examples`.
