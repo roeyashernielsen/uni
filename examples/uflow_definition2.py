@@ -35,7 +35,7 @@ def clean_data(table: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
 @UStep
 def generate_features(
-        table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
+    table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
 ) -> pd.DataFrame:
     features = pd.concat((table1, table2), axis=1)
     return features
@@ -60,7 +60,6 @@ def export_model(model: ssql.DataFrame, path: str, **kwargs) -> None:
     model.write.csv(path)
 
 
-# Doesn't work without specify the param
 with UFlow("example_flow_spark") as flow:
     rand = get_rand.step()
     data = get_dataABC.step(rand=rand)

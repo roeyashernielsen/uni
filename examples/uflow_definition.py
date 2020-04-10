@@ -56,7 +56,6 @@ def export_model(model: np.array, path: str, **kwargs) -> None:
     model.to_csv(path, index=False)
 
 
-# Doesn't work without specify the param
 with UFlow("example_flow") as flow:
     rand = get_rand.step()
     data = get_dataABC.step(rand=rand)
