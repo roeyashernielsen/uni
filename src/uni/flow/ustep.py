@@ -1,7 +1,9 @@
 """UNI Step class."""
 
 import functools
+
 import mlflow
+
 from ..io import writer
 from . import get_params_from_pre_tasks, is_primitive
 
@@ -17,11 +19,16 @@ class UStep:
 
     def __call__(self, **kwargs):
         """Trigger the step as a regular function with MLflow wrapping."""
-        return self.__mlflow_wrapper(nested=False, **kwargs)
+        import prefect
+
+        if prefect.context.get("flow", None):
+            return self.step(**kwargs)
+        else:
+            return self.func(**kwargs)
 
     def run(self, **kwargs):
         """Trigger the step as a regular function."""
-        return self.func(**kwargs)
+        return self.__mlflow_wrapper(nested=False, **kwargs)
 
     def __mlflow_wrapper(self, nested=None, airflow_step=False, **kwargs):
         """Start MLflow run and log the input/output."""
@@ -42,7 +49,7 @@ class UStep:
             mlflow.log_param(f"return_value", func_return)
 
         if airflow_step:
-            writer.save_obj(func_return, self._name)
+            writer.save(obj=func_return, name=self._name, mlflow_logging=True)
             mlflow.end_run()
             mlflow.end_run()
             return run.info.run_id
@@ -56,9 +63,7 @@ class UStep:
         from .result_handler import UResultHandler
 
         @prefect.task(
-            name=self._name,
-            checkpoint=True,
-            result_handler=UResultHandler(self._name),
+            name=self._name, checkpoint=True, result_handler=UResultHandler(self._name),
         )
         @functools.wraps(self.func)
         def wrapper(**kwargs):
@@ -75,7 +80,7 @@ class UStep:
         @functools.wraps(self.func)
         def wrapper(**kwargs):
             return self.__mlflow_wrapper(
-                nested=True, airflow_step=True, **get_params_from_pre_tasks(**kwargs)
+                nested=True, airflow_step=True, **get_params_from_pre_tasks(**kwargs),
             )
 
         return wrapper(**kwargs)
