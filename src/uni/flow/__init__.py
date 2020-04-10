@@ -11,10 +11,7 @@ def is_primitive(obj):
 
 def get_runs_params(task_instance, func_param):
     """Get return value from MLflow run object."""
-    result = {
-        "mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id"),
-        "mlflow_tracking_uri": task_instance.xcom_pull(key="mlflow_tracking_uri"),
-    }
+    result = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
     for func_name, param in func_param.items():
         run_id = task_instance.xcom_pull(task_ids=func_name)
         result.update({param: load_artifact(run_id, func_name)})
@@ -27,6 +24,7 @@ def get_params_from_pre_tasks(**kwargs):
         task_instance = kwargs["ti"]
     else:
         raise Exception("Couldn't find ti in kwargs")
+    mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
     func_param = kwargs.get("func_param", {})
     const_params = kwargs.get("const_params", {})
     return {**const_params, **get_runs_params(task_instance, func_param)}

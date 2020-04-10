@@ -57,9 +57,7 @@ def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet, **
         df_path.endswith(TabularFileFormats.Parquet.value)
         or file_format == TabularFileFormats.Parquet
     ):
-        return pd.read_parquet(
-            path=df_path, engine="pyarrow", columns=columns, **kwargs
-        )
+        return pd.read_parquet(df_path, engine="pyarrow", columns=columns, **kwargs)
     elif (
         df_path.endswith(TabularFileFormats.Feather.value)
         or file_format == TabularFileFormats.Feather

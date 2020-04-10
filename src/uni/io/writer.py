@@ -98,9 +98,7 @@ def save_pd_df(
     path = _get_path(name=df_name, extension=file_format.value, dir_path=dir_path)
 
     if file_format == TabularFileFormats.Parquet:
-        df.to_parquet(
-            path=path, engine="pyarrow", partition_cols=partition_by, **kwargs
-        )
+        df.to_parquet(path, engine="pyarrow", partition_cols=partition_by, **kwargs)
     elif file_format == TabularFileFormats.Feather:
         df.to_feather(path=path, **kwargs)
     else:

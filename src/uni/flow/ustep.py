@@ -73,10 +73,6 @@ class UStep:
 
     def airflow_step(self, **kwargs):
         """The step decorator."""
-        mlflow_tracking_uri = kwargs.get("mlflow_tracking_uri", None)
-        if mlflow_tracking_uri is not None:
-            mlflow.set_tracking_uri(mlflow_tracking_uri)
-
         name = kwargs.get("name", None)
         if name is not None:
             self._name = name
