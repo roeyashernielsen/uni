@@ -41,13 +41,13 @@ def generate_features(
 
 @UStep
 def train_model_RED(features: pd.DataFrame, **kwargs) -> np.array:
-    arr = pd.DataFrame([1, 3, 5, 7])
+    arr = pd.DataFrame([1, 3, 5, 7], columns=["X"])
     return arr
 
 
 @UStep
 def train_model_ROEY(features: pd.DataFrame, **kwargs) -> np.array:
-    arr = pd.DataFrame([2, 4, 6, 8])
+    arr = pd.DataFrame([2, 4, 6, 8], columns=["X"])
     return arr
 
 

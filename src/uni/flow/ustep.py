@@ -3,11 +3,9 @@
 import functools
 
 import mlflow
-import prefect
 
 from ..io import writer
 from . import get_params_from_pre_tasks, is_primitive
-from .result_handler import UResultHandler
 
 
 class UStep:
@@ -21,6 +19,8 @@ class UStep:
 
     def __call__(self, **kwargs):
         """Trigger the step as a regular function with MLflow wrapping."""
+        import prefect
+
         if prefect.context.get("flow", None):
             return self.step(**kwargs)
         else:
@@ -59,6 +59,8 @@ class UStep:
 
     def step(self, **kwargs):
         """The step decorator."""
+        import prefect
+        from .result_handler import UResultHandler
 
         @prefect.task(
             name=self._name, checkpoint=True, result_handler=UResultHandler(self._name),
@@ -71,6 +73,10 @@ class UStep:
 
     def airflow_step(self, **kwargs):
         """The step decorator."""
+        mlflow_tracking_uri = kwargs.get("mlflow_tracking_uri", None)
+        if mlflow_tracking_uri is not None:
+            mlflow.set_tracking_uri(mlflow_tracking_uri)
+
         name = kwargs.get("name", None)
         if name is not None:
             self._name = name
