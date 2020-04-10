@@ -141,7 +141,7 @@ def save_spark_df(
     path = _get_path(name=df_name, dir_path=dir_path)
 
     if file_format == TabularFileFormats.Parquet:
-        df.write.parquet(
+        df.write.mode("overwrite").parquet(
             path=path, mode="overwrite", partitionBy=partition_by, compression="snappy",
         )
         # TODO add support with stempView
