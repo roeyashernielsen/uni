@@ -1,7 +1,8 @@
 """
-Tool for converting flow definition file into Airflow dag definition file.
+Tool for converting flow definition file into IS-compatible Airflow dag definition file.
 
-The input flow may be defined using either an UNI UFlow or Prefect Flow.
+The input flow may be defined using either an UNI UFlow or Prefect Flow. The output
+DAG can be placed in the dag directory of an IS recipe and is ready to be executed.
 """
 
 import click
@@ -11,7 +12,6 @@ from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set, DefaultDict
 from textwrap import dedent, indent
-from utils import logger
 from collections import Counter
 
 
@@ -20,16 +20,13 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
     try:
         global_vars = run_path(flow_definition_path)
     except Exception:
-        logger.error(
-            "Flow definition file contains errors. Cannot convert", reraise=True
-        )
+        click.echo("Flow definition file contains errors. Cannot convert")
 
-    try:
+    if flow_object_name in global_vars:
         return global_vars[flow_object_name]
-    except KeyError:
-        logger.error(
-            "Provided name for flow object does not match flow definition file",
-            reraise=True,
+    else:
+        raise KeyError(
+            "Provided name for flow object does not match flow definition file"
         )
 
 
@@ -62,58 +59,70 @@ def create_task_name_map(flow: Any) -> Dict[int, str]:
     return task_name_map
 
 
-def write_imports(
+def write_dag_configuration(
     flow: Any, flow_definition_path: Path, dag_definition_path: Path
 ) -> None:
-    """Dynamically write import statements of dag definition file."""
+    """Dynamically write dag configuration statements of dag definition file."""
     with open(dag_definition_path, "w") as dag_definition_file:
+        # Extract name of pipeline
+        dag_id = flow.name
+
         # Extract filename sans extension from path of flow definition file
         flow_definition_name = re_search(
             r"[\w-]+?(?=\.)", flow_definition_path.as_posix()
         ).group(0)
 
-        # Assemble import statements
-        imports_str = f"""\
-            from datetime import datetime
-            from airflow import DAG
-            from airflow.operators.python_operator import PythonOperator
-            from uni.flow import init_step
-            from {flow_definition_name} import (
-        """
-
         # Assemble unique task names
         task_names = set(task.name for task in flow.tasks)
 
-        # Write import statements
-        dag_definition_file.write(dedent(imports_str))
-        for task_name in sorted(task_names):
-            task_name_str = f"{task_name},\n"
-            dag_definition_file.write(indent(dedent(task_name_str), prefix=" " * 4))
-        dag_definition_file.write(")\n\n")
+        # Assemble top-level import statements
+        imports_str = """\
+            from datetime import datetime, timedelta
+            from airflow import DAG
+            from dss_airflow_utils.operators.python_operator import PythonOperator
+            from dss_airflow_utils.dag_factory import dag_factory
+        """
 
-
-def write_dag_configuration(
-    flow: Any, flow_definition_path: Path, dag_definition_path: Path
-) -> None:
-    """Dynamically write dag configuration statements of dag definition file."""
-    with open(dag_definition_path, "a") as dag_definition_file:
-        # Extract name of pipeline
-        dag_id = flow.name
-
-        # Assemble dag configuration statements
+        # Assemble default argument configuration statements
         default_args_str = (
-            "default_args = {'owner': 'red', 'start_date': datetime(2017, 3, 20)}\n"
+            "default_args = {"
+            "'owner': 'red',"
+            "'start_date': datetime(2017, 3, 20),"
+            "'retries': 0,"
+            "'retry_delay': timedelta(seconds=10),"
+            "'queue': {"
+            "'request_memory': '16G',"
+            "'request_cpu': '4',"
+            "'worker_type': 'spark2.4.4-python3.7-worker',}"
+            "}\n"
         )
 
+        # Assemble dag definition statements
+        create_dag_function_str = "@dag_factory\ndef create_dag():"
         with_statement_str = f"""
             with DAG(
                 dag_id='{dag_id}', schedule_interval=None, default_args=default_args
             ) as dag:
         """
 
+        # Assemble UNI-related import statements
+        uni_imports_str = f"""
+            from .lib.uni.flow import init_step
+            from .lib.{flow_definition_name} import (
+        """
+
         # Write dag configuration statements
+        dag_definition_file.write(dedent(imports_str))
         dag_definition_file.write(dedent(default_args_str))
-        dag_definition_file.write(dedent(with_statement_str))
+        dag_definition_file.write(dedent(create_dag_function_str))
+        dag_definition_file.write(indent(dedent(with_statement_str), prefix=" " * 4))
+
+        # Write UNI-related import statements
+        dag_definition_file.write(indent(dedent(uni_imports_str), prefix=" " * 8))
+        for task_name in sorted(task_names):
+            task_name_str = f"{task_name},\n"
+            dag_definition_file.write(indent(dedent(task_name_str), prefix=" " * 8))
+        dag_definition_file.write(")\n")
 
 
 def get_func_params(
@@ -151,7 +160,7 @@ def write_operator_definitions(
             "provide_context=True"
             ")\n"
         )
-        dag_definition_file.write(indent(dedent(init_operator_str), prefix=" " * 4))
+        dag_definition_file.write(indent(dedent(init_operator_str), prefix=" " * 8))
 
         # Write remaining operator statements
         for task in flow.tasks:
@@ -168,7 +177,7 @@ def write_operator_definitions(
                 "provide_context=True"
                 ")\n"
             )
-            dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 8))
         dag_definition_file.write("\n")
 
 
@@ -185,21 +194,23 @@ def write_dependency_definitions(
         for task in flow.root_tasks():
             labeled_task_name = task_name_map[id(task)]
             edge_str = f"init >> {labeled_task_name}\n"
-            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 8))
 
         # Add remaining dependencies
         for edge in flow.edges:
             labeled_task_name = task_name_map[id(edge.upstream_task)]
             labeled_downstream_task_name = task_name_map[id(edge.downstream_task)]
             edge_str = f"{labeled_task_name} >> {labeled_downstream_task_name}\n"
-            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 4))
+            dag_definition_file.write(indent(dedent(edge_str), prefix=" " * 8))
+
+        # Add return statement for create_dag() function
+        dag_definition_file.write(indent(dedent("\nreturn dag"), prefix=" " * 8))
 
 
 def write_dag_file(
     flow: Any, dag_definition_path: Path, flow_definition_path: Path
 ) -> None:
     """Generate python file containing dag definition using flow object."""
-    write_imports(flow, flow_definition_path, dag_definition_path)
     write_dag_configuration(flow, flow_definition_path, dag_definition_path)
     write_operator_definitions(flow, flow_definition_path, dag_definition_path)
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
