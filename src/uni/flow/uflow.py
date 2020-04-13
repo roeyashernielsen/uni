@@ -2,6 +2,8 @@
 import mlflow
 import prefect
 
+from uni.utils import SparkEnv
+
 
 class UFlow(prefect.Flow):
     """
@@ -16,9 +18,10 @@ class UFlow(prefect.Flow):
     converting a UFlow object into other objects such as an Airflow DAG object.
     """
 
-    def __init__(self, flow_name: str = None, experiment_name: str = None):
+    def __init__(self, flow_name: str = None, experiment_name: str = None, spark_env=SparkEnv.Local):
         """Instantiate UFlow object."""
-        super().__init__(flow_name)
+        super().__init__(name=flow_name)
+        self.spark_env = spark_env
 
         # Initialize how many times the flow is executed
         self.run_count = 0
@@ -33,7 +36,8 @@ class UFlow(prefect.Flow):
     def run(self, **kwargs) -> "prefect.engine.state.State":
         """Execute flow while recording its execution and artifacts using MLFlow."""
         with mlflow.start_run(run_name=f"Run #{self.run_count}"):
-            run_result = super().run(**kwargs)
+            with prefect.context(spark_env=self.spark_env):
+                run_result = super().run(**kwargs)
         self.run_count += 1
         return run_result
 
