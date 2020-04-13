@@ -1,25 +1,28 @@
+import random
+
 import numpy as np
 import pandas as pd
-
-from src.uni.flow.uflow import UFlow
-from src.uni.flow.ustep import UStep
-from src.uni.utils.spark import spark
-import databricks.koalas as ks
+import pyspark.sql as ssql
+from uni.flow import UStepType
+from uni.flow.uflow import UFlow
+from uni.flow.ustep import UStep
 
 
 @UStep
-def get_dataABC(**kwargs) -> pd.DataFrame:
-    df = spark.createDataFrame([('Alice', 1)])
-    df.createOrReplaceTempView("roey_table")
-    df.show()
-    data = pd.DataFrame(np.arange(12).reshape(3, 4), columns=['A', 'B', 'C', 'D'])
+def get_rand(**kwargs) -> int:
+    rand = random.randint(0, 100)
+    return rand
+
+
+@UStep
+def get_dataABC(rand, **kwargs) -> pd.DataFrame:
+    data = pd.DataFrame(np.arange(12).reshape(3, 4), columns=["A", "B", "C", "D"])
     return data
 
 
 @UStep
-def get_dataXYZ(**kwargs) -> pd.DataFrame:
-    spark.sql("select * from roey_table").show()
-    data = pd.DataFrame(np.arange(3).reshape(3, 1), columns=['X'])
+def get_dataXYZ(rand, **kwargs) -> pd.DataFrame:
+    data = pd.DataFrame(np.arange(3).reshape(3, 1), columns=["X"])
     return data
 
 
@@ -30,37 +33,46 @@ def clean_data(table: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
 
 @UStep
-def generate_features(table1: pd.DataFrame, table2: pd.DataFrame, **kwargs) -> pd.DataFrame:
+def generate_features(
+        table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
+) -> pd.DataFrame:
     features = pd.concat((table1, table2), axis=1)
     return features
 
 
-@UStep
+@UStep(step_type=UStepType.Spark)
 def train_model_RED(features: pd.DataFrame, **kwargs) -> np.array:
-    return pd.DataFrame([1, 3, 5, 7])
+    print(features)
+    df = spark.createDataFrame([[1, 2, 3]], ["col0", "col1", "col2"])
+    df.show()
+    return df
 
 
-@UStep
+@UStep(step_type=UStepType.Spark)
 def train_model_ROEY(features: pd.DataFrame, **kwargs) -> np.array:
-    return pd.DataFrame([2, 4, 6, 8])
+    print(features)
+    df = spark.createDataFrame([[5, 6, 7]], ["col0", "col1", "col2"])
+    df.show()
+    return df
 
 
 @UStep
-def export_model(model: np.array, path: str, **kwargs) -> None:
-    model.to_csv(path, index=False)
+def export_model(model: ssql.DataFrame, path: str, **kwargs) -> None:
+    model.write.csv(path)
 
 
-# Doesn't work without specify the param
-with UFlow('sample_flow') as flow:
-    data = get_dataABC()
-    target_variable = get_dataXYZ()
+with UFlow("example_flow_spark") as flow:
+    rand = get_rand()
+    data = get_dataABC(rand=rand)
+    target_variable = get_dataXYZ(rand=rand)
     data = clean_data(table=data)
     target_variable = clean_data(table=target_variable)
     features = generate_features(table1=data, table2=target_variable)
     model1 = train_model_RED(features=features)
     model2 = train_model_ROEY(features=features)
-    export_model(model=model1, path='model1.csv')
-    export_model(model=model2, path='model2.csv')
+    export_model(model=model1, path="model1")
+    export_model(model=model2, path="model2")
 
-# flow.show()
-flow.run()
+# flow.visualize()
+# flow.run()
+print(get_rand(ti="ti"))
