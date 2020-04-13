@@ -12,7 +12,7 @@ def get_spark_session(spark_env, **kwargs):
         import os
         from dss_airflow_utils.hooks.spark_hook import SparkHook
         os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3"
-        hook = SparkHook(builder_func=builder_func, conn_id="media_data_lake_prod")
+        hook = SparkHook(builder_func=builder_func, conn_id="mdl2_hive_metastore_prod")
         return hook.get_spark_session()
     else:
         raise ValueError(f"spark_env must be a SparkEnv but got {type(spark_env)}")
