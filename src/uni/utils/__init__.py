@@ -9,6 +9,6 @@ class ExtendedEnum(Enum):
 
 
 class SparkEnv(ExtendedEnum):
-    Local = "local"
-    JupyterHub = "DevelopingSparkInJupyter"
+    Local = "Local"
+    JupyterHub = "SparkHook"
     Recipe = "AirflowSparkOperator"

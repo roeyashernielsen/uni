@@ -8,11 +8,10 @@ def get_spark_session(spark_env, **kwargs):
         builder_func(SparkSession.builder)
         return SparkSession.builder.getOrCreate()
 
-    elif spark_env == SparkEnv.JupyterHub:
+    elif spark_env.value == SparkEnv.JupyterHub.value:
         import os
-        os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3"
         from dss_airflow_utils.hooks.spark_hook import SparkHook
-
+        os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3"
         hook = SparkHook(builder_func=builder_func, conn_id="media_data_lake_prod")
         return hook.get_spark_session()
     else:
