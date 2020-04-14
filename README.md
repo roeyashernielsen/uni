@@ -7,7 +7,7 @@
 <a name="converter"></a>
 ## Flow converter
 
-Flow converter (`src/uni/converter.py`) is a tool for converting a Python file containing a flow definition into a new Python file containing an Airflow dag definition. The resulting dag definition file is ready to be used in a recipe within Intelligence studio _without any modification_.
+Flow converter (`src/uni/converter.py`) is a tool for converting a Python file containing a flow definition into a recipe ready to be executed in Intelligence Studio. _No knowledge of Airflow, DAGs, or recipe structure is required._
 
 ### Introduction
 
@@ -54,16 +54,16 @@ pip install -e . -U
 ```
 5. Perform conversion by executing command from top-level directory of repository
 ```
-python src/uni/converter.py <input-flow-path> -f <flow-object-name> -d <output-dag-path>
+python src/uni/converter.py <input-flow-path> -f <flow-object-name> -n <new-recipe-path>
 ```
 
 - `<input-flow-path>` refers to path of Python file containing the flow definition
 
 - `<flow-object-name`> refers to variable name of the flow object defined in flow definition file (typically in the `with` statement). The default value is `flow`.
 
-- `<output-file-path>` refers to path of resulting Python file containing the converted Airflow DAG definition. The default path is `dag.py`.
+- `<new-recipe-path>` refers to path of newly created recipe. The default path is `../my_recipe`.
 
-Store dag definition file in directory `dag/` of recipe. Store input flow definition file in directory `dag/lib` of recipe.
+Execute the recipe by copying the entire directory into Intelligence Studio, navigating to the directory in the terminal, and enter `recipe taste job_request.yaml`.
 
 <a name="examples"></a>
 ### Examples
