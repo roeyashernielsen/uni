@@ -3,6 +3,8 @@ from ..utils import SparkEnv
 
 
 def get_spark_session(spark_env, **kwargs):
+    print("spark_env=" + spark_env)
+    print("kwargs=" + str(kwargs))
     if spark_env.value == SparkEnv.Local.value:
         from pyspark.sql import SparkSession
         builder = SparkSession.builder
@@ -20,6 +22,7 @@ def get_spark_session(spark_env, **kwargs):
         hook = SparkHook(builder_func=builder_func, conn_id="mdl2_hive_metastore_prod")
         return hook.get_spark_session()
     elif spark_env.value == SparkEnv.Recipe.value:
+        print("SparkSession for Recipe:" + kwargs.get("spark", None))
         return kwargs.get("spark", None)
     else:
         raise ValueError(f"spark_env must be a SparkEnv but got {type(spark_env)}")
