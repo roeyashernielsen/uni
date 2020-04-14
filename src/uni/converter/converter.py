@@ -314,7 +314,7 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Copy flow definition file and uni source code into recipe
     copy_flow_definition_file(flow_definition_path, new_recipe_path)
     copy_uni_source_code(new_recipe_path)
-    click.echo("Writing dag definition file...COMPLETE")
+    click.echo("Creating recipe...COMPLETE")
 
 
 if __name__ == "__main__":
