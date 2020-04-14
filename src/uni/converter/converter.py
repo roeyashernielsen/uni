@@ -31,7 +31,7 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
         )
 
 
-def create_recipe(new_recipe_path: str) -> None:
+def create_recipe(new_recipe_path: Path) -> None:
     """Create new recipe directory using template (default behavior is overwrite)."""
     recipe_template_path = Path("src/uni/converter").joinpath("recipe_template")
     shutil.rmtree(new_recipe_path, ignore_errors=True)
