@@ -28,10 +28,12 @@ class _UStep:
             spark_env = SparkEnv.Recipe
         else:
             import prefect
-            if prefect.context.get("flow", None):
+            flow = prefect.context.get("flow", None)
+            if flow:
                 mlflow_tracking = True
                 prefect_flow = True
-                spark_env = prefect.context.get("spark_env", SparkEnv.Local)
+                if type(flow.environment).__name__ == 'JupyterHubEnvironment':
+                    spark_env = SparkEnv.JupyterHub
             elif not mlflow_tracking:
                 mlflow_tracking = False
         return self.__run(prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs)
