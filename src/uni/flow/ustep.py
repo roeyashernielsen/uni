@@ -117,13 +117,13 @@ class _UStep:
 
     def __airflow_step_wrapper(self, func, **kwargs):
         """The step decorator."""
-        name = kwargs.get("name", None)
-        if name is not None:
-            self.name = name
-        params = get_params(**kwargs)
 
         @functools.wraps(func)
         def wrapper(**kwargs):
+            name = kwargs.get("name", None)
+            if name is not None:
+                self.name = name
+            params = get_params(**kwargs)
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
             run_id = func({**kwargs, **params})
