@@ -144,7 +144,7 @@ def save_spark_df(
         df.write.mode("overwrite").parquet(
             path=path, partitionBy=partition_by, compression="snappy",
         )
-        # TODO add support with stempView
+        # TODO add support with tempView
         # df.createOrReplaceTempView(df_name)
     else:
         raise ValueError(
