@@ -259,14 +259,19 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         yaml.dump(metadata_config, f2, sort_keys=False)
 
 
-def copy_flow_definition_file(flow_definition_path: Path) -> None:
+def copy_flow_definition_file(
+    flow_definition_path: Path, new_recipe_path: Path
+) -> None:
     """Copy flow definition file into dag/lib directory of recipe."""
-    pass
+    destination_path = new_recipe_path.joinpath("dag/lib")
+    shutil.copy(flow_definition_path, destination_path)
 
 
-def copy_uni_source_code() -> None:
+def copy_uni_source_code(new_recipe_path: Path) -> None:
     """Copy uni source code into dag/lib directory of recipe."""
-    pass
+    source_code_path = Path("src/uni/")
+    destination_path = new_recipe_path.joinpath("dag/lib/uni")
+    shutil.copytree(source_code_path, destination_path)
 
 
 @click.command()
@@ -307,8 +312,8 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     update_config_files(flow, new_recipe_path)
 
     # Copy flow definition file and uni source code into recipe
-    copy_flow_definition_file(flow_definition_path)
-    copy_uni_source_code()
+    copy_flow_definition_file(flow_definition_path, new_recipe_path)
+    copy_uni_source_code(new_recipe_path)
     click.echo("Writing dag definition file...COMPLETE")
 
 
