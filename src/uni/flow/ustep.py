@@ -58,7 +58,7 @@ class _UStep:
         """Start MLflow run and log the input/output."""
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def wrapper():
             with mlflow.start_run(run_name=self.name, nested=nested) as run:
                 for key, value in kwargs.items():
                     if is_primitive(value):
@@ -83,7 +83,7 @@ class _UStep:
         """Start SparkSession as spark."""
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def wrapper():
             func_globals = func.__globals__
             sentinel = object()
             old_value = func_globals.get('spark', sentinel)
@@ -110,7 +110,7 @@ class _UStep:
             name=self.name, checkpoint=True, result_handler=UResultHandler(self.name),
         )
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def wrapper():
             return func(**kwargs)
 
         return wrapper
@@ -122,7 +122,7 @@ class _UStep:
             self.name = name
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def wrapper():
             params = get_params(**kwargs)
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
