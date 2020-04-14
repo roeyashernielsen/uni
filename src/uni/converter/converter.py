@@ -246,13 +246,13 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
     new_recipe_path = Path(new_recipe_path)
-    dag_definition_path = new_recipe_path.joinpath("dag/dag.py")
 
     # Create new recipe directory with default config files
     create_recipe(new_recipe_path)
 
     # Convert flow definition file into dag definition file
     flow = load_flow_object(flow_definition_path, flow_object_name)
+    dag_definition_path = new_recipe_path.joinpath("dag/dag.py")
     write_dag_file(flow, dag_definition_path, flow_definition_path)
 
     # Process output file through black autoformatter
