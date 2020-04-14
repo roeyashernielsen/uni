@@ -41,12 +41,12 @@ class _UStep:
         func = self.func
         if self.step_type.value == UStepType.Spark.value:
             func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
-        if prefect_flow or airflow_step:
+        if airflow_step:
+            func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
+            func = self.__airflow_step_wrapper(func=func, **kwargs)
+        elif prefect_flow:
             func = self.__mlflow_wrapper(func=func, nested=True, **kwargs)
-            if prefect_flow:
-                func = self.__prefect_step_wrapper(func=func, **kwargs)
-            elif airflow_step:
-                func = self.__airflow_step_wrapper(func=func, **kwargs)
+            func = self.__prefect_step_wrapper(func=func, **kwargs)
         elif mlflow_tracking:
             func = self.__mlflow_wrapper(func=func, nested=False, **kwargs)
 
@@ -70,9 +70,10 @@ class _UStep:
                     mlflow.log_param(f"return_value", func_return)
 
                 if airflow_step:
-                    return run.info.run_id, func_return
+                    return run.info.run_id
                 else:
                     return func_return
+
         return wrapper
 
     def __spark_wrapper(self, func, spark_env=SparkEnv.Local, **kwargs):
@@ -94,6 +95,7 @@ class _UStep:
                     func_globals['spark'] = old_value
 
             return func_result
+
         return wrapper
 
     def __prefect_step_wrapper(self, func, **kwargs):
@@ -116,18 +118,17 @@ class _UStep:
         if name is not None:
             self.name = name
 
-        params = get_params(**kwargs)
-
         @functools.wraps(func)
-        def wrapper():
+        def wrapper(**kwargs):
+            params = get_params(**kwargs)
             if "mlflow_run_id" in params:
-                mlflow.start_run(run_id=kwargs.pop("mlflow_run_id"))
-            mlflow.start_run(run_id=kwargs.pop("mlflow_run_id"))
-            func_return = func(**kwargs)
+                mlflow.start_run(run_id=params.pop("mlflow_run_id"))
+            func_return = func(**params)
             mlflow.end_run()
             writer.save(obj=func_return, name=self.name, mlflow_logging=True)
             return func_return
-        return wrapper()
+
+        return wrapper
 
 
 # wrap _UStep to allow for deferred calling
@@ -141,6 +142,7 @@ def UStep(_func=None, step_type=UStepType.Python):
             if "ti" in kwargs:
                 airflow_step = True
             return ustep(airflow_step=airflow_step, **kwargs)
+
         return wrapper
 
     if _func is None:
