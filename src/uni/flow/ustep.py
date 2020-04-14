@@ -126,7 +126,7 @@ class _UStep:
             params = get_params(**kwargs)
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
-            run_id = func({**kwargs, **params})
+            run_id = func(**{**kwargs, **params})
             mlflow.end_run()
             return run_id
 
