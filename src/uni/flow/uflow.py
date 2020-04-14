@@ -2,7 +2,7 @@
 import mlflow
 import prefect
 
-from uni.utils import SparkEnv
+from ..utils import SparkEnv
 
 
 class UFlow(prefect.Flow):

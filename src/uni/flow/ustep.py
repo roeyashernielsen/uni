@@ -22,17 +22,18 @@ class _UStep:
 
     def __call__(self, spark_env=SparkEnv.Local, airflow_step=False, mlflow_tracking=True, **kwargs):
         """Trigger the step as a regular function with MLflow wrapping."""
-        import prefect
         prefect_flow = False
-        if prefect.context.get("flow", None):
-            mlflow_tracking = True
-            prefect_flow = True
-            spark_env = prefect.context.get("spark_env", SparkEnv.Local)
-        elif airflow_step:
+        if airflow_step:
             mlflow_tracking = True
             spark_env = SparkEnv.Recipe
-        elif not mlflow_tracking:
-            mlflow_tracking = False
+        else:
+            import prefect
+            if prefect.context.get("flow", None):
+                mlflow_tracking = True
+                prefect_flow = True
+                spark_env = prefect.context.get("spark_env", SparkEnv.Local)
+            elif not mlflow_tracking:
+                mlflow_tracking = False
         return self.__run(prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs)
 
     def __run(self, prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs):

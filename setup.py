@@ -21,7 +21,6 @@ setup(
         "click>=7.0",
         "mlflow",
         "prefect",
-        "apache-airflow",
         "pendulum==1.4.4",
         "cloudpickle",
         "pyarrow",
