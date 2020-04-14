@@ -54,7 +54,7 @@ pip install -e . -U
 ```
 5. Perform conversion by executing command from top-level directory of repository
 ```
-python src/uni/converter.py <input-flow-path> -f <flow-object-name> -n <new-recipe-path>
+python src/uni/converter/main.py <input-flow-path> -f <flow-object-name> -n <new-recipe-path>
 ```
 
 - `<input-flow-path>` refers to path of Python file containing the flow definition
