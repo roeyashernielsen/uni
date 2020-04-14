@@ -87,7 +87,7 @@ class _UStep:
             func_globals = func.__globals__
             sentinel = object()
             old_value = func_globals.get('spark', sentinel)
-            func_globals['spark'] = get_spark_session(spark_env=spark_env)
+            func_globals['spark'] = get_spark_session(spark_env=spark_env, **kwargs)
 
             try:
                 func_result = func(**kwargs)
@@ -140,10 +140,18 @@ def UStep(_func=None, step_type=UStepType.Python):
         @functools.wraps(func)
         def wrapper(**kwargs):
             airflow_step = False
+            spark_env = SparkEnv.Local
             ustep = _UStep(func, step_type=step_type)
-            if "ti" in kwargs:
+            if kwargs.get("get_step_type", False):
+                return step_type.value
+            if kwargs.get("spark", None) is not None:
+                print("*****i saw spark in the kwargs*****")
+                spark_env = SparkEnv.Recipe
                 airflow_step = True
-            return ustep(airflow_step=airflow_step, **kwargs)
+            if "ti" in kwargs:
+                print("*****i saw ti in the kwargs*****")
+                airflow_step = True
+            return ustep(spark_env=spark_env, airflow_step=airflow_step, **kwargs)
 
         return wrapper
 

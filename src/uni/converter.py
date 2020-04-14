@@ -170,7 +170,7 @@ def write_operator_definitions(
             operator_str = (
                 f"{labeled_task_name} = PythonOperator("
                 f"task_id='{labeled_task_name}', "
-                f"python_callable={task.name}.airflow_step, "
+                f"python_callable={task.name}, "
                 f"op_kwargs={{'name': '{labeled_task_name}', "
                 f"'func_param': {func_params}, "
                 f"'const_params': {const_params}}}, "
