@@ -52,7 +52,7 @@ class _UStep:
 
         return func(**kwargs)
 
-    def __mlflow_wrapper(self, func, nested=None, airflow_step=False, **kwargs):
+    def __mlflow_wrapper(self, func, nested=None, airflow_step=False):
         """Start MLflow run and log the input/output."""
 
         @functools.wraps(func)
@@ -70,7 +70,7 @@ class _UStep:
                     mlflow.log_param(f"return_value", func_return)
 
                 if airflow_step:
-                    return run.info.run_id
+                    return run.info.run_id, func_return
                 else:
                     return func_return
 
@@ -123,10 +123,10 @@ class _UStep:
             params = get_params(**kwargs)
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
-            func_return = func(**params)
-            mlflow.end_run()
+            run_id, func_return = func(**params)
             writer.save(obj=func_return, name=self.name, mlflow_logging=True)
-            return func_return
+            mlflow.end_run()
+            return run_id
 
         return wrapper
 
