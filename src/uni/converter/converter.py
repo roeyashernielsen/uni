@@ -227,7 +227,26 @@ def write_dag_file(
 
 def update_config_files_with_parameters(flow: Any, new_recipe_path: Path) -> None:
     """Add user-defined parameters from flow into config files of recipe."""
-    pass
+    job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
+    metadata_config_path = new_recipe_path.joinpath("metadata.yaml")
+    dag_id = flow.name
+
+    # Open job_request.yaml and metadata.yaml and update recipe_id field with dag_id
+    with open(job_request_config_path, "r") as f1, open(
+        metadata_config_path, "r"
+    ) as f2:
+        job_request_config = yaml.safe_load(f1)
+        job_request_config["recipe_id"] = dag_id
+
+        metadata_config = yaml.safe_load(f2)
+        metadata_config["recipe_id"] = dag_id
+
+    # Write out updated config YAML files
+    with open(job_request_config_path, "w") as f1, open(
+        metadata_config_path, "w"
+    ) as f2:
+        yaml.dump(job_request_config, f1, sort_keys=False)
+        yaml.dump(metadata_config, f2, sort_keys=False)
 
 
 @click.command()
