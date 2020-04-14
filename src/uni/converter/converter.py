@@ -225,21 +225,31 @@ def write_dag_file(
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
 
 
-def update_config_files_with_parameters(flow: Any, new_recipe_path: Path) -> None:
+def update_recipe_id_in_config_file(config: Dict, new_recipe_id: str) -> Dict:
+    """Update recipe_id field in IS config file."""
+    if "recipe_id" in config:
+        config["recipe_id"] = new_recipe_id
+        return config
+    else:
+        raise KeyError("Config file does not contain field 'recipe_id")
+
+
+def update_config_files(flow: Any, new_recipe_path: Path) -> None:
     """Add user-defined parameters from flow into config files of recipe."""
     job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
     metadata_config_path = new_recipe_path.joinpath("metadata.yaml")
-    dag_id = flow.name
 
     # Open job_request.yaml and metadata.yaml and update recipe_id field with dag_id
     with open(job_request_config_path, "r") as f1, open(
         metadata_config_path, "r"
     ) as f2:
         job_request_config = yaml.safe_load(f1)
-        job_request_config["recipe_id"] = dag_id
-
         metadata_config = yaml.safe_load(f2)
-        metadata_config["recipe_id"] = dag_id
+
+        job_request_config = update_recipe_id_in_config_file(
+            job_request_config, flow.name
+        )
+        metadata_config = update_recipe_id_in_config_file(metadata_config, flow.name)
 
     # Write out updated config YAML files
     with open(job_request_config_path, "w") as f1, open(
@@ -283,7 +293,7 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Process output file through black autoformatter
     subprocess.run(f"black -q {dag_definition_path}", shell=True)
 
-    update_config_files_with_parameters(flow, new_recipe_path)
+    update_config_files(flow, new_recipe_path)
     click.echo("Writing dag definition file...COMPLETE")
 
 
