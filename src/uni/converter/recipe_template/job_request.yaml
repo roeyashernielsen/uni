@@ -1,0 +1,18 @@
+# This is a sample job request for this recipe.
+# Job request is not required to be in the recipe but one is needed to taste the recipe.
+spec_version: v2
+recipe_id: example_flow
+recipe_version: "0_0_0"
+description: |
+  This optional field should be used to describe on a high level what the recipe is about in plain English.
+  E.g., This recipe is a skeleton example to be used as starting point to write new recipes.
+system_configuration:
+  # Set this to True to receive an email notification
+  # on completion. If not provided, defaults to False.
+  send_dag_complete_email: False
+configuration:
+  # Note that the configuration in the job request is not a json schema anymore. 
+  # It must be an object that conforms to the schema defined in metadata.yaml.
+  name_of_the_first_parameter: abc
+  name_of_the_second_parameter: 123
+  email: mari.mizoguchi@nielsen.com

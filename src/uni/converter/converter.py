@@ -7,6 +7,7 @@ DAG can be placed in the dag directory of an IS recipe and is ready to be execut
 
 import click
 import subprocess
+import shutil
 from re import search as re_search
 from pathlib import Path
 from runpy import run_path
@@ -28,6 +29,13 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
         raise KeyError(
             "Provided name for flow object does not match flow definition file"
         )
+
+
+def create_recipe(new_recipe_path: str) -> None:
+    """Create new recipe directory using template (default behavior is overwrite)."""
+    recipe_template_path = Path("src/uni/converter").joinpath("recipe_template")
+    shutil.rmtree(new_recipe_path, ignore_errors=True)
+    shutil.copytree(recipe_template_path, new_recipe_path)
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
@@ -219,11 +227,11 @@ def write_dag_file(
 @click.command()
 @click.argument("flow_definition_path", type=click.Path(exists=True))
 @click.option(
-    "--dag-definition-path",
-    "-d",
-    default="dag.py",
+    "--new-recipe-path",
+    "-n",
+    default="../my_recipe",
     show_default=True,
-    help="location of .py file containing airflow dag definition",
+    help="location of directory containing newly created recipe",
     type=click.Path(resolve_path=True),
 )
 @click.option(
@@ -233,14 +241,17 @@ def write_dag_file(
     show_default=True,
     help="name of flow object defined in flow definition file",
 )
-def cli(
-    flow_definition_path: str, dag_definition_path: str, flow_object_name: str
-) -> None:
+def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
-    dag_definition_path = Path(dag_definition_path)
+    new_recipe_path = Path(new_recipe_path)
+    dag_definition_path = new_recipe_path.joinpath("dag/dag.py")
 
+    # Create new recipe directory with default config files
+    create_recipe(new_recipe_path)
+
+    # Convert flow definition file into dag definition file
     flow = load_flow_object(flow_definition_path, flow_object_name)
     write_dag_file(flow, dag_definition_path, flow_definition_path)
 
