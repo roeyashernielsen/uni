@@ -16,6 +16,7 @@
 #  - test_command - the test command that will be executed inside of the image
 #  - memory - the amount of RAM that the test pod will use in Gigabytes (G) (e.g. 'memory: 4G')
 config:
-    image: python-worker
+    image: spark2.4.4-python3.7-worker
     memory: 4G
     test_command: py.test $TEST_SUITE_PATH --cov ./ --cov-report term-missing --cov-report xml:${COVERAGE_REPORT_DIR}/${TEST_SUITE_NAME}.xml --cache-clear --capture=no --junitxml=${TEST_REPORT_DIR}/${TEST_SUITE_NAME}.xml
+    python_requirements: requirements.txt

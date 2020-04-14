@@ -1,6 +1,6 @@
 # Pound symbol starts a comment. This is a comment.
 spec_version: v2
-recipe_id: example_flow
+recipe_id: new_recipe_name_goes_here
 recipe_version: "0_0_0"  # Recipe version must be in this format
 description: |
   This optional field should be used to describe on a high level what the recipe is about in plain English.

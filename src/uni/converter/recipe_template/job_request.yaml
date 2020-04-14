@@ -1,7 +1,7 @@
 # This is a sample job request for this recipe.
 # Job request is not required to be in the recipe but one is needed to taste the recipe.
 spec_version: v2
-recipe_id: example_flow
+recipe_id: new_recipe_name_goes_here
 recipe_version: "0_0_0"
 description: |
   This optional field should be used to describe on a high level what the recipe is about in plain English.
@@ -15,4 +15,4 @@ configuration:
   # It must be an object that conforms to the schema defined in metadata.yaml.
   name_of_the_first_parameter: abc
   name_of_the_second_parameter: 123
-  email: mari.mizoguchi@nielsen.com
+  email: e.xample@example.com
