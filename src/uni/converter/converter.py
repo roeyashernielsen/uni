@@ -8,6 +8,7 @@ DAG can be placed in the dag directory of an IS recipe and is ready to be execut
 import click
 import subprocess
 import shutil
+import yaml
 from re import search as re_search
 from pathlib import Path
 from runpy import run_path
@@ -224,6 +225,11 @@ def write_dag_file(
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
 
 
+def update_config_files_with_parameters(flow: Any, new_recipe_path: Path) -> None:
+    """Add user-defined parameters from flow into config files of recipe."""
+    pass
+
+
 @click.command()
 @click.argument("flow_definition_path", type=click.Path(exists=True))
 @click.option(
@@ -257,6 +263,8 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
 
     # Process output file through black autoformatter
     subprocess.run(f"black -q {dag_definition_path}", shell=True)
+
+    update_config_files_with_parameters(flow, new_recipe_path)
     click.echo("Writing dag definition file...COMPLETE")
 
 
