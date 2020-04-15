@@ -275,20 +275,13 @@ def modify_flow_definition_file(flow_definition_path: Path) -> None:
     with open(flow_definition_path, "r") as file:
         file_contents = file.read()
 
-    # Modify import statements. UFlow import statement is removed because this object
-    # requires importing prefect package, which is not installed on the IS Airflow
-    # instance (this statement is also not needed for executing a recipe). In addition,
-    # import statements for UStep and get_spark_session are loaded via relative imports
-    file_contents = (
-        file_contents.replace("from uni.flow.uflow import UFlow", "")
-        .replace(
-            "from uni.flow.ustep import UStep", "from .uni.flow.ustep import UStep"
-        )
-        .replace(
-            "from uni.utils.spark import get_spark_session",
-            "from .uni.utils.spark import get_spark_session",
-        )
-    )
+    # Delete UFlow import statement because UFlow object requires importing prefect
+    # package, which is not installed on the IS Airflow instance (this statement is also
+    # not needed for executing a recipe)
+    file_contents = file_contents.replace("from uni.flow.uflow import UFlow", "")
+
+    # Replace absolute import of UNI as relative import
+    file_contents = file_contents.replace("from uni", "from .uni")
 
     # Write out modified flow definition file while deleting context manager used for
     # defining flow because it references UFlow object
