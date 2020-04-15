@@ -16,14 +16,14 @@ def is_primitive(obj):
     return not hasattr(obj, "__dict__")
 
 
-def get_runs_params(task_instance, func_param, **kwargs):
-    """Get return value from MLflow run object."""
-    result = {}
-    for func_name, param in func_param.items():
-        run_id = task_instance.xcom_pull(task_ids=func_name)
-        result.update({param: load_artifact(run_id, func_name)})
-    print("result=" + str(result))
-    return result
+# def get_runs_params(task_instance, func_param, **kwargs):
+#     """Get return value from MLflow run object."""
+#     result = {}
+#     for func_name, param in func_param.items():
+#         run_id = task_instance.xcom_pull(task_ids=func_name)
+#         result.update({param: load_artifact(run_id, func_name, kwargs)})
+#     print("result=" + str(result))
+#     return result
 
 
 def get_params(**kwargs):
@@ -39,9 +39,11 @@ def get_params(**kwargs):
         kwargs = {**kwargs, **params}
     func_param = kwargs.get("func_param", {})
     const_params = kwargs.get("const_params", {})
-    print("func_param=" + str(func_param))
-    return {**mlflow_run_id, **const_params,
-            **get_runs_params(task_instance, func_param, **kwargs)}
+    runs_params = {}
+    for func_name, param in func_param.items():
+        run_id = task_instance.xcom_pull(task_ids=func_name)
+        runs_params.update({param: load_artifact(run_id, func_name, **kwargs)})
+    return {**mlflow_run_id, **const_params, **runs_params}
 
 
 def init_step(**kwargs):
