@@ -223,13 +223,13 @@ def write_dag_file(
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
 
 
-def update_recipe_id_in_config_file(config: Dict, new_recipe_id: str) -> Dict:
-    """Update recipe_id field in config file of recipe."""
-    if "recipe_id" in config:
-        config["recipe_id"] = new_recipe_id
-        return config
-    else:
-        raise KeyError("Config file does not contain field 'recipe_id")
+def update_fields_in_config_file(config: Dict, updated_config: Dict) -> Dict:
+    """Update fields in recipe config file."""
+    for field in updated_config:
+        if field not in config:
+            raise KeyError(f"Config file does not contain field '{field}'")
+        config[field] = updated_config[field]
+    return config
 
 
 def blacken_file(python_file_path: Path) -> None:
@@ -238,7 +238,7 @@ def blacken_file(python_file_path: Path) -> None:
 
 
 def update_config_files(flow: Any, new_recipe_path: Path) -> None:
-    """Add user-defined parameters from flow into config files of recipe."""
+    """Update recipe config files with user-defined parameters from flow object."""
     job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
     metadata_config_path = new_recipe_path.joinpath("metadata.yaml")
 
@@ -248,13 +248,16 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         job_request_config = yaml.safe_load(file1)
         metadata_config = yaml.safe_load(file2)
 
-        # Update recipe_id field in config files with dag_id (same as flow name)
-        job_request_config = update_recipe_id_in_config_file(
-            job_request_config, flow.name
-        )
-        metadata_config = update_recipe_id_in_config_file(metadata_config, flow.name)
+        # Define fields to be updated. ADD MORE AS NEED IN THIS DICT.
+        updated_config = {"recipe_id": flow.name}
 
-    # Write out updated config files
+        # Apply updates to recipe config files
+        job_request_config = update_fields_in_config_file(
+            job_request_config, updated_config
+        )
+        metadata_config = update_fields_in_config_file(metadata_config, updated_config)
+
+    # Write out updated recipe config files
     with open(job_request_config_path, "w") as file1, open(
         metadata_config_path, "w"
     ) as file2:
