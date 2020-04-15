@@ -43,11 +43,11 @@ class _UStep:
         """Run the function."""
         func = self.func
         if airflow_step:
-            func = self.__airflow_step_wrapper(func=func, **kwargs)
             func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
+            func = self.__airflow_step_wrapper(func=func, **kwargs)
         elif prefect_flow:
-            func = self.__prefect_step_wrapper(func=func, **kwargs)
             func = self.__mlflow_wrapper(func=func, nested=True, **kwargs)
+            func = self.__prefect_step_wrapper(func=func, **kwargs)
         elif mlflow_tracking:
             func = self.__mlflow_wrapper(func=func, nested=False, **kwargs)
 
