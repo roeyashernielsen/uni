@@ -42,7 +42,7 @@ class _UStep:
     def __run(self, prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs):
         """Run the function."""
         func = self.func
-        print("i'm in run with spark_env=" + spark_env)
+        print("i'm in run with spark_env=" + str(spark_env))
         if self.step_type.value == UStepType.Spark.value:
             print("trigger spark wrapper")
             func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
@@ -154,7 +154,7 @@ def UStep(_func=None, step_type=UStepType.Python):
             if "ti" in kwargs:
                 print("*****i saw ti in the kwargs*****")
                 airflow_step = True
-            print("triggering ustep _call_ with spark_evn=" + spark_env)
+            print("triggering ustep _call_ with spark_evn=" + str(spark_env))
             return ustep(spark_env=spark_env, airflow_step=airflow_step, **kwargs)
 
         return wrapper
