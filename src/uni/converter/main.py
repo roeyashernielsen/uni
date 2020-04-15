@@ -267,11 +267,7 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
 
 
 def modify_flow_definition_file(flow_definition_path: Path) -> None:
-    """
-    Modify flow definition file to enable compatibility in IS recipe.
-
-    NOTE: this function uses file inspection to detect and modify code--very risky!
-    """
+    """Modify flow definition file to enable compatibility in IS recipe."""
     with open(flow_definition_path, "r") as file:
         file_contents = file.read()
 
@@ -284,7 +280,8 @@ def modify_flow_definition_file(flow_definition_path: Path) -> None:
     file_contents = file_contents.replace("from uni", "from .uni")
 
     # Write out modified flow definition file while deleting context manager used for
-    # defining flow because it references UFlow object
+    # defining flow because it references UFlow object.
+    # NOTE: this will also delete any code below context manager
     with open(flow_definition_path, "w") as file:
         context_manager_found = False
         line_count = len(file_contents.split("\n"))
