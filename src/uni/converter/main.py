@@ -259,12 +259,46 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         yaml.dump(metadata_config, f2, sort_keys=False)
 
 
+def update_flow_definition_file(destination_path: Path, flow_definition_path) -> None:
+    flow_definition_filename = flow_definition_path.stem + flow_definition_path.suffix
+    new_flow_definition_path = destination_path.joinpath(flow_definition_filename)
+    with open(new_flow_definition_path, "r+") as file:
+        file_as_string = file.read()
+
+    line_count = len(file_as_string.split("\n"))
+    file_as_string = (
+        file_as_string.replace("from uni.flow.uflow import UFlow", "")
+        .replace(
+            "from uni.flow.ustep import UStep", "from .uni.flow.ustep import UStep"
+        )
+        .replace(
+            "from uni.utils.spark import get_spark_session",
+            "from .uni.utils.spark import get_spark_session",
+        )
+    )
+
+    with open(new_flow_definition_path, "w") as file:
+        uflow_found = False
+        index = 0
+        file_as_string = file_as_string.split("\n")
+
+        while index < line_count:
+            if "with UFlow" in file_as_string[index]:
+                uflow_found = True
+            if not uflow_found:
+                file.write(file_as_string[index] + "\n")
+            index += 1
+
+
 def copy_flow_definition_file(
     flow_definition_path: Path, new_recipe_path: Path
 ) -> None:
     """Copy flow definition file into dag/lib directory of recipe."""
     destination_path = new_recipe_path.joinpath("dag/lib")
     shutil.copy(flow_definition_path, destination_path)
+
+    # Modify copied flow definition file to ensure compatibility in IS recipe
+    update_flow_definition_file(destination_path, flow_definition_path)
 
 
 def copy_uni_source_code(new_recipe_path: Path) -> None:
