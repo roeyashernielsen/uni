@@ -59,7 +59,7 @@ python src/uni/converter/main.py <input-flow-path> -f <flow-object-name> -n <new
 
 - `<input-flow-path>` refers to path of Python file containing the flow definition
 
-- `<flow-object-name`> refers to variable name of the flow object defined in flow definition file (typically in the `with` statement). The default value is `flow`.
+- `<flow-object-name`> refers to variable name of the flow object defined in flow definition file within the context manager. The default value is `flow`.
 
 - `<new-recipe-path>` refers to path of newly created recipe. The default path is `../my_recipe`.
 
