@@ -77,9 +77,7 @@ def write_dag_configuration(
         dag_id = flow.name
 
         # Extract filename sans extension from path of flow definition file
-        flow_definition_name = re_search(
-            r"[\w-]+?(?=\.)", flow_definition_path.as_posix()
-        ).group(0)
+        flow_definition_name = flow_definition_path.stem
 
         # Assemble unique task names
         task_names = set(task.name for task in flow.tasks)
