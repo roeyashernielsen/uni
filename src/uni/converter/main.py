@@ -248,7 +248,8 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         job_request_config = yaml.safe_load(file1)
         metadata_config = yaml.safe_load(file2)
 
-        # Define fields to be updated. ADD MORE AS NEED IN THIS DICT.
+        # Define fields to be updated
+        # NOTE: this line should be updated with additional parameters as needed
         updated_config = {"recipe_id": flow.name}
 
         # Apply updates to recipe config files
@@ -266,7 +267,11 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
 
 
 def modify_flow_definition_file(flow_definition_path: Path) -> None:
-    """Modify flow definition file to enable compatibility in IS recipe."""
+    """
+    Modify flow definition file to enable compatibility in IS recipe.
+
+    NOTE: this function uses file inspection to detect and modify code--very risky!
+    """
     with open(flow_definition_path, "r") as file:
         file_contents = file.read()
 
@@ -346,6 +351,8 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     new_recipe_path = Path(new_recipe_path)
 
     # Create new recipe directory with default config files
+    # NOTE: this line should be replaced with a call to recipe init to connect with most
+    # up-to-date recipe skeleton and default files
     create_recipe(new_recipe_path)
 
     # Convert flow definition file into dag definition file
@@ -357,12 +364,13 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Update recipe config files with user-defined parameters in flow definition
     update_config_files(flow, new_recipe_path)
 
-    # Copy flow definition file into recipe because it is currently referenced by dag
-    # definition file
+    # Copy flow definition file into recipe
+    # NOTE: this should be replaced with updated references to files in underlying UNI
+    # Project once available
     copy_flow_definition_file(flow_definition_path, new_recipe_path)
 
-    # Copy UNI source coded directory into recipe because UNI is currently not available
-    # as a package
+    # Copy UNI source code directory into recipe
+    # NOTE: this line should be removed once UNI is available as a package
     copy_uni_source_code(new_recipe_path)
     click.echo("Creating recipe...COMPLETE")
 
