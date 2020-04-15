@@ -41,8 +41,8 @@ def get_params(**kwargs):
     const_params = kwargs.get("const_params", {})
     runs_params = {}
     for func_name, param in func_param.items():
-        run_id = task_instance.xcom_pull(task_ids=func_name)
-        runs_params.update({param: load_artifact(run_id, func_name, **kwargs)})
+        task_run_id = task_instance.xcom_pull(task_ids=func_name)
+        runs_params.update({param: load_artifact(task_run_id, func_name, **kwargs)})
     return {**mlflow_run_id, **const_params, **runs_params}
 
 
