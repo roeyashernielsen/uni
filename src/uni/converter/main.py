@@ -233,6 +233,7 @@ def update_recipe_id_in_config_file(config: Dict, new_recipe_id: str) -> Dict:
 
 
 def blacken_file(python_file_path: Path) -> None:
+    """Process python file through black autoformatter without confirmation messages."""
     subprocess.run(f"black -q {python_file_path}", shell=True)
 
 
@@ -241,11 +242,11 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
     job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
     metadata_config_path = new_recipe_path.joinpath("metadata.yaml")
 
-    with open(job_request_config_path, "r") as f1, open(
+    with open(job_request_config_path, "r") as file1, open(
         metadata_config_path, "r"
-    ) as f2:
-        job_request_config = yaml.safe_load(f1)
-        metadata_config = yaml.safe_load(f2)
+    ) as file2:
+        job_request_config = yaml.safe_load(file1)
+        metadata_config = yaml.safe_load(file2)
 
         # Update recipe_id field in config files with dag_id (same as flow name)
         job_request_config = update_recipe_id_in_config_file(
@@ -254,20 +255,24 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         metadata_config = update_recipe_id_in_config_file(metadata_config, flow.name)
 
     # Write out updated config files
-    with open(job_request_config_path, "w") as f1, open(
+    with open(job_request_config_path, "w") as file1, open(
         metadata_config_path, "w"
-    ) as f2:
-        yaml.dump(job_request_config, f1, sort_keys=False)
-        yaml.dump(metadata_config, f2, sort_keys=False)
+    ) as file2:
+        yaml.dump(job_request_config, file1, sort_keys=False)
+        yaml.dump(metadata_config, file2, sort_keys=False)
 
 
-def update_flow_definition_file(destination_path: Path) -> None:
-    with open(destination_path, "r+") as file:
-        file_as_string = file.read()
+def modify_flow_definition_file(flow_definition_path: Path) -> None:
+    """Modify flow definition file to enable compatibility in IS recipe."""
+    with open(flow_definition_path, "r") as file:
+        file_contents = file.read()
 
-    line_count = len(file_as_string.split("\n"))
-    file_as_string = (
-        file_as_string.replace("from uni.flow.uflow import UFlow", "")
+    # Modify import statements. Any statements that reference UFlow are removed because
+    # this object requires importing prefect, which is not installed on the IS Airflow
+    # instance (these statements are also not needed for executing a recipe). In
+    # addition, UStep and get_spark_session are loaded via relative imports.
+    file_contents = (
+        file_contents.replace("from uni.flow.uflow import UFlow", "")
         .replace(
             "from uni.flow.ustep import UStep", "from .uni.flow.ustep import UStep"
         )
@@ -277,19 +282,21 @@ def update_flow_definition_file(destination_path: Path) -> None:
         )
     )
 
-    with open(destination_path, "w") as file:
-        uflow_found = False
+    # Write out modified flow definition file while deleting context manager used for
+    # defining flow because it references UFlow object
+    with open(flow_definition_path, "w") as file:
+        context_manager_found = False
+        line_count = len(file_contents.split("\n"))
         index = 0
-        file_as_string = file_as_string.split("\n")
+        file_contents_split = file_contents.split("\n")
 
-        while index < line_count:
-            if "with UFlow" in file_as_string[index]:
-                uflow_found = True
-            if not uflow_found:
-                file.write(file_as_string[index] + "\n")
+        while index < line_count and not context_manager_found:
+            file.write(file_contents_split[index] + "\n")
             index += 1
+            if "with UFlow" in file_contents_split[index]:
+                context_manager_found = True
 
-    blacken_file(destination_path)
+    blacken_file(flow_definition_path)
 
 
 def copy_flow_definition_file(
@@ -302,8 +309,8 @@ def copy_flow_definition_file(
     )
     shutil.copyfile(flow_definition_path, destination_path)
 
-    # Modify copied flow definition file to ensure compatibility in IS recipe
-    update_flow_definition_file(destination_path)
+    # Modify copied flow definition file to enable compatibility in IS recipe
+    modify_flow_definition_file(destination_path)
 
 
 def copy_uni_source_code(new_recipe_path: Path) -> None:
@@ -343,8 +350,6 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     flow = load_flow_object(flow_definition_path, flow_object_name)
     dag_definition_path = new_recipe_path.joinpath("dag/dag.py")
     write_dag_file(flow, dag_definition_path, flow_definition_path)
-
-    # Process output file through black autoformatter
     blacken_file(dag_definition_path)
 
     # Update config files in recipe
