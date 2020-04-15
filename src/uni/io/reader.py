@@ -78,7 +78,6 @@ def load_spark_df(df_path, file_format=TabularFileFormats.Parquet):
     If name is not None, load the df from the MLflow artifact
     """
 
-    spark = get_spark_session()
     if file_format == TabularFileFormats.Parquet:
         return spark.read.parquet(df_path)
     else:

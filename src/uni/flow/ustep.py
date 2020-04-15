@@ -42,16 +42,17 @@ class _UStep:
     def __run(self, prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs):
         """Run the function."""
         func = self.func
-        if self.step_type.value == UStepType.Spark.value:
-            func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
         if airflow_step:
-            func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
             func = self.__airflow_step_wrapper(func=func, **kwargs)
+            func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
         elif prefect_flow:
-            func = self.__mlflow_wrapper(func=func, nested=True, **kwargs)
             func = self.__prefect_step_wrapper(func=func, **kwargs)
+            func = self.__mlflow_wrapper(func=func, nested=True, **kwargs)
         elif mlflow_tracking:
             func = self.__mlflow_wrapper(func=func, nested=False, **kwargs)
+
+        if self.step_type.value == UStepType.Spark.value:
+            func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
 
         return func(**kwargs)
 
