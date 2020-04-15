@@ -270,10 +270,10 @@ def modify_flow_definition_file(flow_definition_path: Path) -> None:
     with open(flow_definition_path, "r") as file:
         file_contents = file.read()
 
-    # Modify import statements. Any statements that reference UFlow are removed because
-    # this object requires importing prefect, which is not installed on the IS Airflow
-    # instance (these statements are also not needed for executing a recipe). In
-    # addition, UStep and get_spark_session are loaded via relative imports.
+    # Modify import statements. UFlow import statement is removed because this object
+    # requires importing prefect package, which is not installed on the IS Airflow
+    # instance (this statement is also not needed for executing a recipe). In addition,
+    # import statements for UStep and get_spark_session are loaded via relative imports
     file_contents = (
         file_contents.replace("from uni.flow.uflow import UFlow", "")
         .replace(
@@ -296,8 +296,7 @@ def modify_flow_definition_file(flow_definition_path: Path) -> None:
         while index < line_count and not context_manager_found:
             file.write(file_contents_split[index] + "\n")
             index += 1
-            if "with UFlow" in file_contents_split[index]:
-                context_manager_found = True
+            context_manager_found = "with UFlow" in file_contents_split[index]
 
     blacken_file(flow_definition_path)
 
@@ -358,13 +357,13 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Update recipe config files with user-defined parameters in flow definition
     update_config_files(flow, new_recipe_path)
 
-    # Copy flow definition file into dag/lib. Flow definition file must live in recipe
-    # because it is currently referenced by dag definition file.
+    # Copy flow definition file into recipe because it is currently referenced by dag
+    # definition file
     copy_flow_definition_file(flow_definition_path, new_recipe_path)
 
-    # Copy UNI source code into dag/lib. UNI source code must live in recipe because UNI
-    # is not available as a package currently. Once this changes, this line and the
-    # associated code can be removed.
+    # Copy UNI source coded directory into recipe because UNI is currently not available
+    # as a package
+    copy_uni_source_code(new_recipe_path)
     click.echo("Creating recipe...COMPLETE")
 
 
