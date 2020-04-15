@@ -355,12 +355,16 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     write_dag_file(flow, dag_definition_path, flow_definition_path)
     blacken_file(dag_definition_path)
 
-    # Update config files in recipe
+    # Update recipe config files with user-defined parameters in flow definition
     update_config_files(flow, new_recipe_path)
 
-    # Copy flow definition file and uni source code into recipe
+    # Copy flow definition file into dag/lib. Flow definition file must live in recipe
+    # because it is currently referenced by dag definition file.
     copy_flow_definition_file(flow_definition_path, new_recipe_path)
-    copy_uni_source_code(new_recipe_path)
+
+    # Copy UNI source code into dag/lib. UNI source code must live in recipe because UNI
+    # is not available as a package currently. Once this changes, this line and the
+    # associated code can be removed.
     click.echo("Creating recipe...COMPLETE")
 
 
