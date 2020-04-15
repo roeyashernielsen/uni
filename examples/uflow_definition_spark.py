@@ -5,6 +5,7 @@ import pandas as pd
 
 import pyspark.sql as ssql
 from uni.flow.uflow import UFlow
+from uni.flow import UStepType
 from uni.flow.ustep import UStep
 from uni.utils.spark import get_spark_session
 
@@ -35,29 +36,33 @@ def clean_data(table: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
 @UStep
 def generate_features(
-    table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
+        table1: pd.DataFrame, table2: pd.DataFrame, **kwargs
 ) -> pd.DataFrame:
     features = pd.concat((table1, table2), axis=1)
     return features
 
 
-@UStep
+@UStep(step_type=UStepType.Spark)
 def train_model_RED(features: pd.DataFrame, **kwargs) -> np.array:
-    spark = get_spark_session()
-    df = spark.createDataFrame(features)
+    print(features)
+    df = spark.createDataFrame([[1, 2, 3]], ["col0", "col1", "col2"])
+    df.show()
     return df
 
 
-@UStep
+@UStep(step_type=UStepType.Spark)
 def train_model_ROEY(features: pd.DataFrame, **kwargs) -> np.array:
-    spark = get_spark_session()
-    df = spark.createDataFrame(features)
+    print(features)
+    df = spark.createDataFrame([[4, 5, 6]], ["col0", "col1", "col2"])
+    df.show()
     return df
 
 
-@UStep
-def export_model(model: ssql.DataFrame, path: str, **kwargs) -> None:
-    model.write.csv(path)
+@UStep(step_type=UStepType.Spark)
+def export_model(model: np.array, path: str, **kwargs) -> None:
+    df = spark.createDataFrame([[7, 8, 9]], ["col0", "col1", "col2"])
+    df.show()
+    model.to_csv(path, index=False)
 
 
 with UFlow("example_flow_spark") as flow:

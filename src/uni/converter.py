@@ -80,8 +80,17 @@ def write_dag_configuration(
             from datetime import datetime, timedelta
             from airflow import DAG
             from dss_airflow_utils.operators.python_operator import PythonOperator
-            from dss_airflow_utils.dag_factory import dag_factory
+            from dss_airflow_utils.spark import SparkOperator
+            from dss_airflow_utils.dag_factory import dag_factory, DagConfig, SparkConfig
         """
+
+        spark_default = (
+            "SPARK_WORKER = 'spark2.4.4-python3.7-worker'\n"
+            "SPARK_CONFIG = SparkConfig(num_nodes=1, request_cpu_per_node=4, request_memory_per_node=2, "
+            "worker_type=SPARK_WORKER)\n"
+            "spark_queue_default = {'worker_type': SPARK_WORKER, 'request_memory': '16G', 'request_cpu': '4'}\n"
+            "spark_confs_default = {'spark.executor.cores': 4, 'spark.executor.memory': '2G'}\n"
+        )
 
         # Assemble default argument configuration statements
         default_args_str = (
@@ -93,12 +102,12 @@ def write_dag_configuration(
             "'queue': {"
             "'request_memory': '16G',"
             "'request_cpu': '4',"
-            "'worker_type': 'spark2.4.4-python3.7-worker',}"
+            "'worker_type': SPARK_WORKER,}"
             "}\n"
         )
 
         # Assemble dag definition statements
-        create_dag_function_str = "@dag_factory\ndef create_dag():"
+        create_dag_function_str = "@dag_factory(DagConfig(SPARK_CONFIG))\ndef create_dag():"
         with_statement_str = f"""
             with DAG(
                 dag_id='{dag_id}', schedule_interval=None, default_args=default_args
@@ -113,6 +122,7 @@ def write_dag_configuration(
 
         # Write dag configuration statements
         dag_definition_file.write(dedent(imports_str))
+        dag_definition_file.write(dedent(spark_default))
         dag_definition_file.write(dedent(default_args_str))
         dag_definition_file.write(dedent(create_dag_function_str))
         dag_definition_file.write(indent(dedent(with_statement_str), prefix=" " * 4))
@@ -167,16 +177,30 @@ def write_operator_definitions(
             labeled_task_name = task_name_map[id(task)]
             func_params = get_func_params(flow.edges, labeled_task_name, task_name_map)
             const_params = get_const_params(task, flow.constants)
-            operator_str = (
-                f"{labeled_task_name} = PythonOperator("
-                f"task_id='{labeled_task_name}', "
-                f"python_callable={task.name}, "
-                f"op_kwargs={{'name': '{labeled_task_name}', "
-                f"'func_param': {func_params}, "
-                f"'const_params': {const_params}}}, "
-                "provide_context=True"
-                ")\n"
-            )
+            if 'SparkOperator' in task.tags:
+                operator_str = (
+                    f"{labeled_task_name} = SparkOperator("
+                    f"task_id='{labeled_task_name}', "
+                    f"func={task.name}, "
+                    f"params={{'name': '{labeled_task_name}', "
+                    f"'func_param': {func_params}, "
+                    f"'const_params': {const_params}}}, "
+                    "queue=spark_queue_default,"
+                    "spark_confs=spark_confs_default,"
+                    "provide_context=True"
+                    ")\n"
+                )
+            else:
+                operator_str = (
+                    f"{labeled_task_name} = PythonOperator("
+                    f"task_id='{labeled_task_name}', "
+                    f"python_callable={task.name}, "
+                    f"op_kwargs={{'name': '{labeled_task_name}', "
+                    f"'func_param': {func_params}, "
+                    f"'const_params': {const_params}}}, "
+                    "provide_context=True"
+                    ")\n"
+                )
             dag_definition_file.write(indent(dedent(operator_str), prefix=" " * 8))
         dag_definition_file.write("\n")
 
