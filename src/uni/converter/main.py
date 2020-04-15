@@ -232,6 +232,10 @@ def update_recipe_id_in_config_file(config: Dict, new_recipe_id: str) -> Dict:
         raise KeyError("Config file does not contain field 'recipe_id")
 
 
+def blacken_file(python_file_path: Path) -> None:
+    subprocess.run(f"black -q {python_file_path}", shell=True)
+
+
 def update_config_files(flow: Any, new_recipe_path: Path) -> None:
     """Add user-defined parameters from flow into config files of recipe."""
     job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
@@ -284,6 +288,8 @@ def update_flow_definition_file(destination_path: Path) -> None:
             if not uflow_found:
                 file.write(file_as_string[index] + "\n")
             index += 1
+
+    blacken_file(destination_path)
 
 
 def copy_flow_definition_file(
@@ -339,7 +345,7 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     write_dag_file(flow, dag_definition_path, flow_definition_path)
 
     # Process output file through black autoformatter
-    subprocess.run(f"black -q {dag_definition_path}", shell=True)
+    blacken_file(dag_definition_path)
 
     # Update config files in recipe
     update_config_files(flow, new_recipe_path)
