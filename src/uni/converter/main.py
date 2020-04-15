@@ -9,7 +9,6 @@ import click
 import subprocess
 import shutil
 import yaml
-from re import search as re_search
 from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set, DefaultDict
