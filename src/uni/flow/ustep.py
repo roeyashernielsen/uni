@@ -145,8 +145,6 @@ def UStep(_func=None, step_type=UStepType.Python):
             airflow_step = False
             spark_env = SparkEnv.Local
             ustep = _UStep(func, step_type=step_type)
-            if kwargs.get("get_step_type", False):
-                return step_type.value
             if kwargs.get("spark", None) is not None:
                 spark_env = SparkEnv.Recipe
                 airflow_step = True
