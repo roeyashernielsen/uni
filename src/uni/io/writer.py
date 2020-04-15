@@ -140,8 +140,6 @@ def save_spark_df(
         raise ValueError(f"df must be a Spark DataFrame but got {type(df)}")
 
     path = _get_path(name=df_name, dir_path=dir_path)
-    df.show()
-    print("write df to " + path)
 
     if file_format == TabularFileFormats.Parquet:
         df.write.mode("overwrite").parquet(
@@ -153,11 +151,6 @@ def save_spark_df(
         raise ValueError(
             f"file_format must be a TabularFileFormats but got {type(file_format)}"
         )
-
-    files = [f for f in glob.glob(path + "/*", recursive=True)]
-
-    for f in files:
-        print(f)
 
     if mlflow_logging:
         log_artifact(
