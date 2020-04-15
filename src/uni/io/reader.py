@@ -54,10 +54,11 @@ def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet, **
     """
 
     if (
-        df_path.endswith(TabularFileFormats.Parquet.value)
-        or file_format == TabularFileFormats.Parquet
+            df_path.endswith(TabularFileFormats.Parquet.value)
+            or file_format == TabularFileFormats.Parquet
     ):
-        return pd.read_parquet(df_path, engine="pyarrow", columns=columns, **kwargs)
+        # TODO add **kwargs
+        return pd.read_parquet(df_path, engine="pyarrow", columns=columns)
     elif (
         df_path.endswith(TabularFileFormats.Feather.value)
         or file_format == TabularFileFormats.Feather
