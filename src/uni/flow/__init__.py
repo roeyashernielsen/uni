@@ -34,6 +34,9 @@ def get_params(**kwargs):
         raise Exception("Couldn't find ti in kwargs")
     mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
     mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
+    params = kwargs.get("params", None)
+    if params is not None:
+        kwargs = {**kwargs, **params}
     func_param = kwargs.get("func_param", {})
     const_params = kwargs.get("const_params", {})
     print("func_param=" + str(func_param))
