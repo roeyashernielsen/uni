@@ -74,5 +74,5 @@ with UFlow(flow_name="example_flow_spark") as flow:
     export_model(model=model2, path="model2")
     export_model(model=model1, path="model1")
 
-# flow.run()
-print(train_model_ROEY(get_step_type=True))
+flow.run()
+# print(train_model_ROEY(get_step_type=True))
