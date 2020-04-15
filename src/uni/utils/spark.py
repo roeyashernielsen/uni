@@ -2,7 +2,7 @@
 from ..utils import SparkEnv
 
 
-def get_spark_session(spark_env, **kwargs):
+def get_spark_session(spark_env=SparkEnv.Local, **kwargs):
     if "spark" in kwargs:
         spark_env = SparkEnv.Recipe
 
