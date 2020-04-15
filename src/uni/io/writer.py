@@ -139,7 +139,8 @@ def save_spark_df(
         raise ValueError(f"df must be a Spark DataFrame but got {type(df)}")
 
     path = _get_path(name=df_name, dir_path=dir_path)
-
+    df.show()
+    print("write df to " + path)
     if file_format == TabularFileFormats.Parquet:
         df.write.mode("overwrite").parquet(
             path=path, partitionBy=partition_by, compression="snappy",
