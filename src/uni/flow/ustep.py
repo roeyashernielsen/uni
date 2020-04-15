@@ -76,7 +76,7 @@ class _UStep:
 
                 if airflow_step:
                     from dss_airflow_utils.workspace_utils import path_in_workspace
-                    path = "file:" + path_in_workspace("") + "tmp"
+                    path = path_in_workspace("") + "tmp"
                     writer.save(obj=func_return, name=self.name, dir_path=path, mlflow_logging=True)
                     return run.info.run_id
                 else:
