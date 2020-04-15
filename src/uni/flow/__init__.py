@@ -16,7 +16,7 @@ def is_primitive(obj):
     return not hasattr(obj, "__dict__")
 
 
-def get_runs_params(task_instance, func_param):
+def get_runs_params(task_instance, func_param, **kwargs):
     """Get return value from MLflow run object."""
     result = {}
     for func_name, param in func_param.items():
@@ -40,7 +40,8 @@ def get_params(**kwargs):
     func_param = kwargs.get("func_param", {})
     const_params = kwargs.get("const_params", {})
     print("func_param=" + str(func_param))
-    return {**mlflow_run_id, **const_params, **get_runs_params(task_instance, func_param)}
+    return {**mlflow_run_id, **const_params,
+            **get_runs_params(task_instance, func_param, **kwargs)}
 
 
 def init_step(**kwargs):

@@ -9,16 +9,16 @@ from ..io import ObjType, PyObjFileFormat, TabularFileFormats
 from ..utils.spark import get_spark_session
 
 
-def load(path, obj_type=None):
+def load(path, obj_type=None, **kwargs):
     if obj_type == ObjType.PandasDF.value:
-        return load_pd_df(df_path=path)
+        return load_pd_df(df_path=path, **kwargs)
     elif obj_type == ObjType.SparkDF.value:
-        return load_spark_df(df_path=path)
+        return load_spark_df(df_path=path, **kwargs)
     else:
-        return load_py_obj(obj_path=path)
+        return load_py_obj(obj_path=path, **kwargs)
 
 
-def load_py_obj(obj_path, file_format=PyObjFileFormat.Pickle):
+def load_py_obj(obj_path, file_format=PyObjFileFormat.Pickle, **kwargs):
     """
     Loads object.
 
@@ -69,7 +69,7 @@ def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet, **
         )
 
 
-def load_spark_df(df_path, file_format=TabularFileFormats.Parquet):
+def load_spark_df(df_path, file_format=TabularFileFormats.Parquet, **kwargs):
     """
     Loads object.
 
@@ -77,7 +77,7 @@ def load_spark_df(df_path, file_format=TabularFileFormats.Parquet):
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-
+    spark = get_spark_session(**kwargs)
     if file_format == TabularFileFormats.Parquet:
         return spark.read.parquet(df_path)
     else:

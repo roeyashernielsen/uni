@@ -3,6 +3,9 @@ from ..utils import SparkEnv
 
 
 def get_spark_session(spark_env, **kwargs):
+    if "spark" in kwargs:
+        spark_env = SparkEnv.Recipe
+
     if spark_env.value == SparkEnv.Local.value:
         from pyspark.sql import SparkSession
         builder = SparkSession.builder

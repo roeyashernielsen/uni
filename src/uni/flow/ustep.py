@@ -36,16 +36,17 @@ class _UStep:
                     spark_env = SparkEnv.JupyterHub
             elif not mlflow_tracking:
                 mlflow_tracking = False
-        print("triggering ustep _call_ with spark_evn=" + str(spark_env))
         return self.__run(prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs)
 
     def __run(self, prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs):
         """Run the function."""
         func = self.func
         if self.step_type.value == UStepType.Spark.value:
+            print("trigger __spark_wrapper ")
             func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
 
         if airflow_step:
+            print("trigger __mlflow_wrapper ")
             func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
             func = self.__airflow_step_wrapper(func=func, **kwargs)
         elif prefect_flow:
@@ -109,7 +110,7 @@ class _UStep:
         from .result_handler import UResultHandler
 
         @prefect.task(
-            name=self.name, checkpoint=True, result_handler=UResultHandler(self.name),
+            name=self.name, tags={self.step_type.value}, checkpoint=True, result_handler=UResultHandler(self.name),
         )
         @functools.wraps(func)
         def prefect_wrapper(**kwargs):
@@ -125,9 +126,7 @@ class _UStep:
             name = kwargs.get("name", None)
             if name is not None:
                 self.name = name
-            print("kwargs=" + str(kwargs))
             params = get_params(**kwargs)
-            print("params=" + str(params))
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
             run_id = func(**{**kwargs, **params})
