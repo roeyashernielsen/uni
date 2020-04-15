@@ -42,9 +42,7 @@ class _UStep:
     def __run(self, prefect_flow, airflow_step, mlflow_tracking, spark_env, **kwargs):
         """Run the function."""
         func = self.func
-        print("i'm in run with spark_env=" + str(spark_env))
         if self.step_type.value == UStepType.Spark.value:
-            print("trigger spark wrapper")
             func = self.__spark_wrapper(func=func, spark_env=spark_env, **kwargs)
         if airflow_step:
             func = self.__mlflow_wrapper(func=func, nested=True, airflow_step=True, **kwargs)
@@ -61,7 +59,7 @@ class _UStep:
         """Start MLflow run and log the input/output."""
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def mlflow_wrapper(**kwargs):
             with mlflow.start_run(run_name=self.name, nested=nested) as run:
                 for key, value in kwargs.items():
                     if is_primitive(value):
@@ -80,13 +78,13 @@ class _UStep:
                 else:
                     return func_return
 
-        return wrapper
+        return mlflow_wrapper
 
     def __spark_wrapper(self, func, spark_env=SparkEnv.Local, **kwargs):
         """Start SparkSession as spark."""
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def spark_wrapper(**kwargs):
             func_globals = func.__globals__
             sentinel = object()
             old_value = func_globals.get('spark', sentinel)
@@ -102,7 +100,7 @@ class _UStep:
 
             return func_result
 
-        return wrapper
+        return spark_wrapper
 
     def __prefect_step_wrapper(self, func, **kwargs):
         """The step decorator."""
@@ -113,27 +111,29 @@ class _UStep:
             name=self.name, checkpoint=True, result_handler=UResultHandler(self.name),
         )
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def prefect_wrapper(**kwargs):
             return func(**kwargs)
 
-        return wrapper
+        return prefect_wrapper
 
     def __airflow_step_wrapper(self, func, **kwargs):
         """The step decorator."""
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def airflow_wrapper(**kwargs):
             name = kwargs.get("name", None)
             if name is not None:
                 self.name = name
+            print("kwargs=" + str(kwargs))
             params = get_params(**kwargs)
+            print("params=" + str(params))
             if "mlflow_run_id" in params:
                 mlflow.start_run(run_id=params.pop("mlflow_run_id"))
             run_id = func(**{**kwargs, **params})
             mlflow.end_run()
             return run_id
 
-        return wrapper
+        return airflow_wrapper
 
 
 # wrap _UStep to allow for deferred calling
@@ -141,23 +141,20 @@ def UStep(_func=None, step_type=UStepType.Python):
     def decorator_UStep(func):
 
         @functools.wraps(func)
-        def wrapper(**kwargs):
+        def ustep_wrapper(**kwargs):
             airflow_step = False
             spark_env = SparkEnv.Local
             ustep = _UStep(func, step_type=step_type)
             if kwargs.get("get_step_type", False):
                 return step_type.value
             if kwargs.get("spark", None) is not None:
-                print("*****i saw spark in the kwargs*****")
                 spark_env = SparkEnv.Recipe
                 airflow_step = True
             if "ti" in kwargs:
-                print("*****i saw ti in the kwargs*****")
                 airflow_step = True
-            print("triggering ustep _call_ with spark_evn=" + str(spark_env))
             return ustep(spark_env=spark_env, airflow_step=airflow_step, **kwargs)
 
-        return wrapper
+        return ustep_wrapper
 
     if _func is None:
         return decorator_UStep

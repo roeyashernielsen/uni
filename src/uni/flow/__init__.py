@@ -22,6 +22,7 @@ def get_runs_params(task_instance, func_param):
     for func_name, param in func_param.items():
         run_id = task_instance.xcom_pull(task_ids=func_name)
         result.update({param: load_artifact(run_id, func_name)})
+    print("result=" + str(result))
     return result
 
 
@@ -35,6 +36,7 @@ def get_params(**kwargs):
     mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
     func_param = kwargs.get("func_param", {})
     const_params = kwargs.get("const_params", {})
+    print("func_param=" + str(func_param))
     return {**mlflow_run_id, **const_params, **get_runs_params(task_instance, func_param)}
 
 

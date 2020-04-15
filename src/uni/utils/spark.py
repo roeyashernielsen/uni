@@ -3,7 +3,7 @@ from ..utils import SparkEnv
 
 
 def get_spark_session(spark_env, **kwargs):
-    print("spark_env=" + spark_env)
+    print("spark_env=" + str(spark_env))
     print("kwargs=" + str(kwargs))
     if spark_env.value == SparkEnv.Local.value:
         from pyspark.sql import SparkSession
