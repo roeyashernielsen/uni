@@ -259,10 +259,8 @@ def update_config_files(flow: Any, new_recipe_path: Path) -> None:
         yaml.dump(metadata_config, f2, sort_keys=False)
 
 
-def update_flow_definition_file(destination_path: Path, flow_definition_path) -> None:
-    flow_definition_filename = flow_definition_path.stem + flow_definition_path.suffix
-    new_flow_definition_path = destination_path.joinpath(flow_definition_filename)
-    with open(new_flow_definition_path, "r+") as file:
+def update_flow_definition_file(destination_path: Path) -> None:
+    with open(destination_path, "r+") as file:
         file_as_string = file.read()
 
     line_count = len(file_as_string.split("\n"))
@@ -277,7 +275,7 @@ def update_flow_definition_file(destination_path: Path, flow_definition_path) ->
         )
     )
 
-    with open(new_flow_definition_path, "w") as file:
+    with open(destination_path, "w") as file:
         uflow_found = False
         index = 0
         file_as_string = file_as_string.split("\n")
@@ -294,11 +292,14 @@ def copy_flow_definition_file(
     flow_definition_path: Path, new_recipe_path: Path
 ) -> None:
     """Copy flow definition file into dag/lib directory of recipe."""
-    destination_path = new_recipe_path.joinpath("dag/lib")
-    shutil.copy(flow_definition_path, destination_path)
+    flow_definition_filename = flow_definition_path.stem + flow_definition_path.suffix
+    destination_path = new_recipe_path.joinpath("dag/lib/").joinpath(
+        flow_definition_filename
+    )
+    shutil.copyfile(flow_definition_path, destination_path)
 
     # Modify copied flow definition file to ensure compatibility in IS recipe
-    update_flow_definition_file(destination_path, flow_definition_path)
+    update_flow_definition_file(destination_path)
 
 
 def copy_uni_source_code(new_recipe_path: Path) -> None:
