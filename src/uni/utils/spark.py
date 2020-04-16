@@ -20,7 +20,7 @@ def get_spark_session(spark_env, builder_func=None, conn_id=None):
         if builder_func is not None:
             _builder_func = builder_func
         else:
-            _builder_func = local_default_builder_func
+            _builder_func = spark_hook_default_builder_func
 
         if conn_id is not None:
             _conn_id = conn_id
