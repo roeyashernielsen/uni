@@ -76,6 +76,10 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         @wraps(_func)
         def mlflow_wrapper(**kwargs):
+            print("enter mlflow_wrapper")
+            print("flow_type=" + str(flow_type))
+            print("step_type=" + str(step_type))
+            print("spark_env=" + str(spark_env))
             with mlflow.start_run(run_name=name, nested=True) as run:
                 for key, value in kwargs.items():
                     if is_primitive(value):
@@ -105,6 +109,10 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         @wraps(_func)
         def spark_wrapper(**kwargs):
+            print("enter spark_wrapper")
+            print("flow_type=" + str(flow_type))
+            print("step_type=" + str(step_type))
+            print("spark_env=" + str(spark_env))
             func_globals = func.__globals__
             sentinel = object()
             old_value = func_globals.get('spark', sentinel)
@@ -141,6 +149,10 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         @wraps(_func)
         def airflow_wrapper(**kwargs):
+            print("enter airflow_wrapper")
+            print("flow_type=" + str(flow_type))
+            print("step_type=" + str(step_type))
+            print("spark_env=" + str(spark_env))
             mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
             mlflow_run_id = task_instance.xcom_pull(key="mlflow_run_id")
 

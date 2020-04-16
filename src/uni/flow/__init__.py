@@ -1,8 +1,6 @@
 """Submodule containing flow utils."""
 import mlflow
 
-from ..utils.mlflow import load_artifact
-
 from ..utils import ExtendedEnum
 
 
