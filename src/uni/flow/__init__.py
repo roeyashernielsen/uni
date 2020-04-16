@@ -22,32 +22,6 @@ def is_primitive(obj):
     return not hasattr(obj, "__dict__")
 
 
-# def get_runs_params(task_instance, func_param, **kwargs):
-#     """Get return value from MLflow run object."""
-#     result = {}
-#     for func_name, param in func_param.items():
-#         run_id = task_instance.xcom_pull(task_ids=func_name)
-#         result.update({param: load_artifact(run_id, func_name, kwargs)})
-#     print("result=" + str(result))
-#     return result
-
-
-def get_params(task_instance, **kwargs):
-    """Get return values from prev-functions."""
-    mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
-    mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
-    params = kwargs.get("params", None)
-    if params is not None:
-        kwargs = {**kwargs, **params}
-    func_param = kwargs.get("func_param", {})
-    const_params = kwargs.get("const_params", {})
-    runs_params = {}
-    for func_name, param in func_param.items():
-        task_run_id = task_instance.xcom_pull(task_ids=func_name)
-        runs_params.update({param: load_artifact(task_run_id, func_name)})
-    return {**mlflow_run_id, **const_params, **runs_params}
-
-
 def init_step(**kwargs):
     """Airflow init step."""
     from dss_airflow_utils.workspace_utils import path_in_workspace

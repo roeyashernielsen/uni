@@ -75,4 +75,8 @@ with UFlow(flow_name="example_flow_spark") as flow:
     export_model(model=model1, path="model1")
 
 flow.run()
+
+# print(get_rand())
+# for task in flow.tasks:
+# print(UStepType.Spark.value in task.tags)
 # print(train_model_ROEY(get_step_type=True))

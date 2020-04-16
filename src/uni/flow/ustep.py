@@ -9,6 +9,7 @@ from .. import shared
 from ..io import writer
 from . import get_params, is_primitive, UStepType, FlowType
 from ..utils import SparkEnv
+from ..utils.mlflow import load_artifact
 from ..utils.spark import get_spark_session
 
 
@@ -140,10 +141,23 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         @wraps(_func)
         def airflow_wrapper(**kwargs):
-            params = get_params(task_instance, **kwargs)
-            if "mlflow_run_id" in params:
-                mlflow.start_run(run_id=params.pop("mlflow_run_id"))
-            run_id = func(**{**kwargs, **params})
+            mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
+            mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
+
+            params = kwargs.get("params", None)
+            if params is not None:
+                kwargs = {**kwargs, **params}
+
+            func_param = kwargs.get("func_param", {})
+            const_params = kwargs.get("const_params", {})
+            runs_params = {}
+
+            for func_name, param in func_param.items():
+                task_run_id = task_instance.xcom_pull(task_ids=func_name)
+                runs_params.update({param: load_artifact(task_run_id, func_name)})
+
+            mlflow.start_run(run_id=mlflow_run_id)
+            run_id = func(**{**const_params, **runs_params})
             mlflow.end_run()
             return run_id
 
