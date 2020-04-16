@@ -1,16 +1,16 @@
 """UNI Step class."""
 
-from functools import wraps, partial
+from functools import partial, wraps
 
 import mlflow
 from pyspark.sql import SparkSession
 
 from .. import shared
 from ..io import writer
-from . import is_primitive, UStepType, FlowType
 from ..utils import SparkEnv
 from ..utils.mlflow import load_artifact
 from ..utils.spark import get_spark_session
+from . import FlowType, UStepType, is_primitive
 
 
 def UStep(func=None, *, name=None, step_type=None, spark_env=None):
@@ -33,7 +33,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         nonlocal task_instance
         nonlocal spark_env
 
-        kwargs = {**kwargs, **kwargs.get('context', {})}
+        kwargs = {**kwargs, **kwargs.get("context", {})}
 
         task_instance = kwargs.get("ti", None)
         if task_instance is not None:
@@ -45,11 +45,12 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
                         shared.spark_session = args[0]
         else:
             import prefect
+
             flow = prefect.context.get("flow", None)
             if flow:
                 flow_type = FlowType.Prefect
                 if step_type.value == UStepType.Spark.value:
-                    if type(flow.environment).__name__ == 'JupyterHubEnvironment':
+                    if type(flow.environment).__name__ == "JupyterHubEnvironment":
                         spark_env = SparkEnv.JupyterHub
 
             if step_type.value == UStepType.Spark.value:
@@ -71,7 +72,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         return _func(**kwargs)
 
     def __mlflow_wrapper(_func):
-        """Start MLflow run and log the input/output."""
+        """MLflow wrapper."""
 
         @wraps(_func)
         def mlflow_wrapper(**kwargs):
@@ -91,8 +92,11 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
                     path = None
                     if step_type.value == UStepType.Spark.value:
                         from dss_airflow_utils.workspace_utils import path_in_workspace
+
                         path = path_in_workspace("") + "tmp"
-                    writer.save(obj=func_return, name=name, dir_path=path, mlflow_logging=True)
+                    writer.save(
+                        obj=func_return, name=name, dir_path=path, mlflow_logging=True
+                    )
                     return run.info.run_id
                 else:
                     return func_return
@@ -106,28 +110,31 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         def spark_wrapper(**kwargs):
             func_globals = func.__globals__
             sentinel = object()
-            old_value = func_globals.get('spark', sentinel)
-            func_globals['spark'] = shared.spark_session
+            old_value = func_globals.get("spark", sentinel)
+            func_globals["spark"] = shared.spark_session
 
             try:
                 func_result = _func(**kwargs)
             finally:
                 if old_value is sentinel:
-                    del func_globals['spark']
+                    del func_globals["spark"]
                 else:
-                    func_globals['spark'] = old_value
+                    func_globals["spark"] = old_value
 
             return func_result
 
         return spark_wrapper
 
     def __prefect_step_wrapper(_func):
-        """The step decorator."""
+        """Prefect step wrapper."""
         import prefect
         from .result_handler import UResultHandler
 
         @prefect.task(
-            name=name, tags={step_type.value}, checkpoint=True, result_handler=UResultHandler(name),
+            name=name,
+            tags={step_type.value},
+            checkpoint=True,
+            result_handler=UResultHandler(name),
         )
         @wraps(_func)
         def prefect_wrapper(**kwargs):
@@ -136,7 +143,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         return prefect_wrapper
 
     def __airflow_step_wrapper(_func):
-        """The step decorator."""
+        """Airflow step wrapper."""
 
         @wraps(_func)
         def airflow_wrapper(**kwargs):
