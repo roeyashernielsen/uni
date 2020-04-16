@@ -13,11 +13,21 @@ from ..utils.spark import get_spark_session
 from . import FlowType, UStepType, is_primitive
 
 
-def UStep(func=None, *, name=None, step_type=None, spark_env=None):
+def UStep(func=None, *,
+          name=None,
+          step_type=None,
+          spark_env=None,
+          builder_func=None,
+          conn_id=None):
     """UNI step decorator."""
 
     if func is None:
-        return partial(UStep, name=name, step_type=step_type, spark_env=spark_env)
+        return partial(UStep,
+                       name=name,
+                       step_type=step_type,
+                       spark_env=spark_env,
+                       builder_func=builder_func,
+                       conn_id=conn_id)
 
     name = name if name else func.__name__
     step_type = step_type if step_type else UStepType.Python
@@ -55,7 +65,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
             if step_type.value == UStepType.Spark.value:
                 if shared.spark_session is None:
-                    shared.spark_session = get_spark_session(spark_env)
+                    shared.spark_session = get_spark_session(spark_env, builder_func, conn_id)
 
         return __run(func, **kwargs)
 
