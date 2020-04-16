@@ -158,6 +158,10 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
             if params is not None:
                 kwargs = {**kwargs, **params}
 
+            nonlocal name
+            if "name" in kwargs:
+                name = kwargs["name"]
+
             func_param = kwargs.get("func_param", {})
             const_params = kwargs.get("const_params", {})
             runs_params = {}
