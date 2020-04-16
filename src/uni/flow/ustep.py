@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 
 from .. import shared
 from ..io import writer
-from . import get_params, is_primitive, UStepType, FlowType
+from . import is_primitive, UStepType, FlowType
 from ..utils import SparkEnv
 from ..utils.mlflow import load_artifact
 from ..utils.spark import get_spark_session
