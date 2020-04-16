@@ -11,6 +11,12 @@ class UStepType(ExtendedEnum):
     Spark = "SparkOperator"
 
 
+class FlowType(ExtendedEnum):
+    NA = None
+    Prefect = "Prefect"
+    Airflow = "Airflow"
+
+
 def is_primitive(obj):
     """Check if object is "primitive"."""
     return not hasattr(obj, "__dict__")
@@ -26,12 +32,8 @@ def is_primitive(obj):
 #     return result
 
 
-def get_params(**kwargs):
+def get_params(task_instance, **kwargs):
     """Get return values from prev-functions."""
-    if "ti" in kwargs:
-        task_instance = kwargs["ti"]
-    else:
-        raise Exception("Couldn't find ti in kwargs")
     mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
     mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
     params = kwargs.get("params", None)
@@ -42,7 +44,7 @@ def get_params(**kwargs):
     runs_params = {}
     for func_name, param in func_param.items():
         task_run_id = task_instance.xcom_pull(task_ids=func_name)
-        runs_params.update({param: load_artifact(task_run_id, func_name, **kwargs)})
+        runs_params.update({param: load_artifact(task_run_id, func_name)})
     return {**mlflow_run_id, **const_params, **runs_params}
 
 

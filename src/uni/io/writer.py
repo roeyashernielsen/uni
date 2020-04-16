@@ -2,7 +2,6 @@
 import os
 import pickle
 import tempfile
-import glob
 
 import cloudpickle
 import pandas as pd
