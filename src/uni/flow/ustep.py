@@ -60,18 +60,16 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
     def __run(_func, **kwargs):
         """Run the function."""
         if step_type.value == UStepType.Spark.value:
-            _func = __spark_wrapper(_func, **kwargs)
+            _func = __spark_wrapper(_func)
 
         if flow_type.value == FlowType.Airflow.value:
-            _func = __mlflow_wrapper(_func, **kwargs)
-            _func = __airflow_step_wrapper(_func, **kwargs)
+            _func = __airflow_step_wrapper(_func)
         elif flow_type.value == FlowType.Prefect.value:
-            _func = __mlflow_wrapper(_func, **kwargs)
-            _func = __prefect_step_wrapper(_func, **kwargs)
+            _func = __prefect_step_wrapper(_func)
 
         return _func(**kwargs)
 
-    def __mlflow_wrapper(_func, **kwargs):
+    def __mlflow_wrapper(_func):
         """Start MLflow run and log the input/output."""
 
         @wraps(_func)
@@ -104,7 +102,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         return mlflow_wrapper
 
-    def __spark_wrapper(_func, **kwargs):
+    def __spark_wrapper(_func):
         """Start SparkSession as spark."""
 
         @wraps(_func)
@@ -130,7 +128,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
 
         return spark_wrapper
 
-    def __prefect_step_wrapper(_func, **kwargs):
+    def __prefect_step_wrapper(_func):
         """The step decorator."""
         import prefect
         from .result_handler import UResultHandler
@@ -140,11 +138,11 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         )
         @wraps(_func)
         def prefect_wrapper(**kwargs):
-            return _func(**kwargs)
+            return __mlflow_wrapper(_func)(**kwargs)
 
         return prefect_wrapper
 
-    def __airflow_step_wrapper(_func, **kwargs):
+    def __airflow_step_wrapper(_func):
         """The step decorator."""
 
         @wraps(_func)
@@ -169,7 +167,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
                 runs_params.update({param: load_artifact(task_run_id, func_name)})
 
             mlflow.start_run(run_id=mlflow_run_id)
-            run_id = func(**{**const_params, **runs_params})
+            run_id = __mlflow_wrapper(_func)(**{**const_params, **runs_params})
             mlflow.end_run()
             return run_id
 
