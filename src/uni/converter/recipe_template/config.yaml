@@ -1,0 +1,29 @@
+## Config file for common Recipe settings
+
+# The following configuration represents the default configuration that will
+# be used if this config file is not present in this recipe directory.
+
+linter:
+# This section allows you to customize the linting behavior during
+# the recipe test and publish workflows.
+
+# The `image` key allows you to specify the docker image in which the linting
+# will run. This would allow you to change the version of Python that the linting
+# runs in by specifying, for example, `spark3-worker`, `spark2.3.0-r3.6.0-worker`,
+# `python3-worker`, or `python-worker`.
+
+# The `command` argument lets you customize the linting command that gets
+# run inside the aforementioned image. You should not need to change this
+# unless you know what you are doing and have a reason to.
+
+# The warn_only parameter will run the lint checks, but will not fail
+# the job if there are linting errors. You might use this option during
+# development to warn you of linting issues, but not prevent your tests
+# from running.
+
+# By default, the Pylint linter is configured and will look for a .pylintrc
+# in the recipe directory (this dir) and use that configuration by default.
+# For information about tuning Pylint, please see https://www.pylint.org/.
+  image: "spark2.4.4-python3.7-worker"
+  command: "pylint --score=n --reports=n --output-format=text ${RECIPE_PATH}/dag"
+  warn_only: False
