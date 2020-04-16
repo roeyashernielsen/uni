@@ -142,7 +142,7 @@ def UStep(func=None, *, name=None, step_type=None, spark_env=None):
         @wraps(_func)
         def airflow_wrapper(**kwargs):
             mlflow.set_tracking_uri(task_instance.xcom_pull(key="mlflow_tracking_uri"))
-            mlflow_run_id = {"mlflow_run_id": task_instance.xcom_pull(key="mlflow_run_id")}
+            mlflow_run_id = task_instance.xcom_pull(key="mlflow_run_id")
 
             params = kwargs.get("params", None)
             if params is not None:
