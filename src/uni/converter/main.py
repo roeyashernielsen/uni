@@ -1,13 +1,14 @@
 """
-Tool for converting flow definition file into IS-compatible Airflow dag definition file.
+Tool for converting flow definition file into an IS recipe.
 
-The input flow may be defined using either an UNI UFlow or Prefect Flow. The output
-DAG can be placed in the dag directory of an IS recipe and is ready to be executed.
+The input flow should be defined using UNI UFlow and UStep. The resulting recipe is
+ready to be executed immediately.
 """
 
 import click
 import subprocess
-from re import search as re_search
+import shutil
+import yaml
 from pathlib import Path
 from runpy import run_path
 from typing import Any, Dict, Set, DefaultDict
@@ -28,6 +29,13 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
         raise KeyError(
             "Provided name for flow object does not match flow definition file"
         )
+
+
+def create_recipe(new_recipe_path: Path) -> None:
+    """Create new recipe directory using template (default behavior is overwrite)."""
+    recipe_template_path = Path("src/uni/converter/recipe_template")
+    shutil.rmtree(new_recipe_path, ignore_errors=True)
+    shutil.copytree(recipe_template_path, new_recipe_path)
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
@@ -68,9 +76,7 @@ def write_dag_configuration(
         dag_id = flow.name
 
         # Extract filename sans extension from path of flow definition file
-        flow_definition_name = re_search(
-            r"[\w-]+?(?=\.)", flow_definition_path.as_posix()
-        ).group(0)
+        flow_definition_name = flow_definition_path.stem
 
         # Assemble unique task names
         task_names = set(task.name for task in flow.tasks)
@@ -240,14 +246,108 @@ def write_dag_file(
     write_dependency_definitions(flow, flow_definition_path, dag_definition_path)
 
 
+def update_fields_in_config_file(config: Dict, updated_config: Dict) -> Dict:
+    """Update fields in recipe config file."""
+    for field in updated_config:
+        if field not in config:
+            raise KeyError(f"Config file does not contain field '{field}'")
+        config[field] = updated_config[field]
+    return config
+
+
+def blacken_file(python_file_path: Path) -> None:
+    """Process python file through black autoformatter without confirmation messages."""
+    subprocess.run(f"black -q {python_file_path}", shell=True)
+
+
+def update_config_files(flow: Any, new_recipe_path: Path) -> None:
+    """Update recipe config files with user-defined parameters from flow object."""
+    job_request_config_path = new_recipe_path.joinpath("job_request.yaml")
+    metadata_config_path = new_recipe_path.joinpath("metadata.yaml")
+
+    with open(job_request_config_path, "r") as file1, open(
+        metadata_config_path, "r"
+    ) as file2:
+        job_request_config = yaml.safe_load(file1)
+        metadata_config = yaml.safe_load(file2)
+
+        # Define fields to be updated
+        # NOTE: this line should be updated with additional parameters as needed
+        updated_config = {"recipe_id": flow.name}
+
+        # Apply updates to recipe config files
+        job_request_config = update_fields_in_config_file(
+            job_request_config, updated_config
+        )
+        metadata_config = update_fields_in_config_file(metadata_config, updated_config)
+
+    # Write out updated recipe config files
+    with open(job_request_config_path, "w") as file1, open(
+        metadata_config_path, "w"
+    ) as file2:
+        yaml.dump(job_request_config, file1, sort_keys=False)
+        yaml.dump(metadata_config, file2, sort_keys=False)
+
+
+def modify_flow_definition_file(flow_definition_path: Path) -> None:
+    """Modify flow definition file to enable compatibility in IS recipe."""
+    with open(flow_definition_path, "r") as file:
+        file_contents = file.read()
+
+    # Delete UFlow import statement because UFlow object requires importing prefect
+    # package, which is not installed on the IS Airflow instance (this statement is also
+    # not needed for executing a recipe)
+    file_contents = file_contents.replace("from uni.flow.uflow import UFlow", "")
+
+    # Replace absolute import of UNI as relative import
+    file_contents = file_contents.replace("from uni", "from .uni")
+
+    # Write out modified flow definition file while deleting context manager used for
+    # defining flow because it references UFlow object.
+    # NOTE: this will also delete any code below context manager
+    with open(flow_definition_path, "w") as file:
+        context_manager_found = False
+        line_count = len(file_contents.split("\n"))
+        index = 0
+        file_contents_split = file_contents.split("\n")
+
+        while index < line_count and not context_manager_found:
+            file.write(file_contents_split[index] + "\n")
+            index += 1
+            context_manager_found = "with UFlow" in file_contents_split[index]
+
+    blacken_file(flow_definition_path)
+
+
+def copy_flow_definition_file(
+    flow_definition_path: Path, new_recipe_path: Path
+) -> None:
+    """Copy flow definition file into dag/lib directory of recipe."""
+    flow_definition_filename = flow_definition_path.stem + flow_definition_path.suffix
+    destination_path = new_recipe_path.joinpath("dag/lib/").joinpath(
+        flow_definition_filename
+    )
+    shutil.copyfile(flow_definition_path, destination_path)
+
+    # Modify copied flow definition file to enable compatibility in IS recipe
+    modify_flow_definition_file(destination_path)
+
+
+def copy_uni_source_code(new_recipe_path: Path) -> None:
+    """Copy uni source code into dag/lib directory of recipe."""
+    source_code_path = Path("src/uni/")
+    destination_path = new_recipe_path.joinpath("dag/lib/uni")
+    shutil.copytree(source_code_path, destination_path)
+
+
 @click.command()
 @click.argument("flow_definition_path", type=click.Path(exists=True))
 @click.option(
-    "--dag-definition-path",
-    "-d",
-    default="dag.py",
+    "--new-recipe-path",
+    "-n",
+    default="../my_recipe",
     show_default=True,
-    help="location of .py file containing airflow dag definition",
+    help="location of directory containing newly created recipe",
     type=click.Path(resolve_path=True),
 )
 @click.option(
@@ -257,20 +357,35 @@ def write_dag_file(
     show_default=True,
     help="name of flow object defined in flow definition file",
 )
-def cli(
-    flow_definition_path: str, dag_definition_path: str, flow_object_name: str
-) -> None:
+def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
-    dag_definition_path = Path(dag_definition_path)
+    new_recipe_path = Path(new_recipe_path)
 
+    # Create new recipe directory with default config files
+    # NOTE: this line should be replaced with a call to recipe init to connect with most
+    # up-to-date recipe skeleton and default files
+    create_recipe(new_recipe_path)
+
+    # Convert flow definition file into dag definition file
     flow = load_flow_object(flow_definition_path, flow_object_name)
+    dag_definition_path = new_recipe_path.joinpath("dag/dag.py")
     write_dag_file(flow, dag_definition_path, flow_definition_path)
+    blacken_file(dag_definition_path)
 
-    # Process output file through black autoformatter
-    subprocess.run(f"black -q {dag_definition_path}", shell=True)
-    click.echo("Writing dag definition file...COMPLETE")
+    # Update recipe config files with user-defined parameters in flow definition
+    update_config_files(flow, new_recipe_path)
+
+    # Copy flow definition file into recipe
+    # NOTE: this should be replaced with updated references to files in underlying UNI
+    # Project once available
+    copy_flow_definition_file(flow_definition_path, new_recipe_path)
+
+    # Copy UNI source code directory into recipe
+    # NOTE: this line should be removed once UNI is available as a package
+    copy_uni_source_code(new_recipe_path)
+    click.echo("Creating recipe...COMPLETE")
 
 
 if __name__ == "__main__":

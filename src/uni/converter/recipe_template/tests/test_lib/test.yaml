@@ -1,0 +1,22 @@
+# This generic configuration should be good in most cases to run pytests.
+# So, don't play with this file unless you are 100% sure what you are doing.
+# Tests will be executed suite by suite (test suite is a directory located under 'tests' directory
+# that starts with 'test_' and that contains one or more test files that start with 'test_')
+# Following environmental variables are available:
+# $TEST_SUITE_PATH is the relative path to the test suite from the recipe root.
+# $TEST_SUITE_NAME is the name of the test suite
+# $COVERAGE_REPORT_DIR is the relative path to the coverage reports directory under recipe root
+# $TEST_REPORT_DIR is the relative path to the test reports directory under recipe root
+# --cov ./: invoke pytest-cov for current directory
+# --cov-report term-missing: terminal report with line numbers
+# --cov-report xml:/...: creates xml report at designated output
+#
+# Config Parameters
+#  - image - the docker image that the tests will run in
+#  - test_command - the test command that will be executed inside of the image
+#  - memory - the amount of RAM that the test pod will use in Gigabytes (G) (e.g. 'memory: 4G')
+config:
+    image: spark2.4.4-python3.7-worker
+    memory: 4G
+    test_command: py.test $TEST_SUITE_PATH --cov ./ --cov-report term-missing --cov-report xml:${COVERAGE_REPORT_DIR}/${TEST_SUITE_NAME}.xml --cache-clear --capture=no --junitxml=${TEST_REPORT_DIR}/${TEST_SUITE_NAME}.xml
+    python_requirements: requirements.txt

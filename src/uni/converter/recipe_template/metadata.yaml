@@ -1,0 +1,24 @@
+# Pound symbol starts a comment. This is a comment.
+spec_version: v2
+recipe_id: new_recipe_name_goes_here
+recipe_version: "0_0_0"  # Recipe version must be in this format
+description: |
+  This optional field should be used to describe on a high level what the recipe is about in plain English.
+  E.g., This recipe is a skeleton example to be used as starting point to write new recipes.
+configuration:
+  # Configuration defines the parameters that must be provided to your job.  All recipes require that
+  # the email parameter be defined as a string, so the configuration section is thus required.
+  # If your recipe accepts any other input parameters via the job request you must
+  # define here as a valid jsonschema but in yaml format.  For a friendly jsonschema reference, see
+  # https://spacetelescope.github.io/understanding-json-schema/index.html
+  properties:
+    name_of_the_first_parameter:
+      description: Plain English description on the what this parameter means, is used for, whatever.
+      type: string
+    name_of_the_second_parameter:
+      description: Same as above
+      type: number
+    email:
+      description: This required parameter is your email address so you can be
+        notified of the success or failure of your dag run.
+      type: string
