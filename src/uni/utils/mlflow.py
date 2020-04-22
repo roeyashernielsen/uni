@@ -51,9 +51,9 @@ def get_artifact_md(run_id, name) -> ArtifactMD:
     )
 
 
-def load_artifact(run_id, name):
+def load_artifact(task_run_id, task_name):
     """Load MLflow artifact"""
-    artifact_md = get_artifact_md(run_id, name)
+    artifact_md = get_artifact_md(task_run_id, task_name)
     if artifact_md.path is None:
-        raise FileNotFoundError(f"Artifact={name} did not found in run_id={run_id}")
+        raise FileNotFoundError(f"Artifact={task_name} did not found in run_id={task_run_id}")
     return load(path=artifact_md.path, obj_type=artifact_md.obj_type)

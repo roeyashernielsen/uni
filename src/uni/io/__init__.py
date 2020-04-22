@@ -1,11 +1,5 @@
 """Submodule containing io utils."""
-from enum import Enum
-
-
-class ExtendedEnum(Enum):
-    @classmethod
-    def tolist(cls):
-        return list(map(lambda c: c.value, cls))
+from ..utils import ExtendedEnum
 
 
 class TabularFileFormats(ExtendedEnum):

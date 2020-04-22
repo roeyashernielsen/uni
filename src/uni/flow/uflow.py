@@ -1,6 +1,7 @@
 """Package contains UNI UFlow class for creating, executing, and recording flows."""
 import mlflow
 import prefect
+from prefect.environments.execution import Environment
 
 
 class UFlow(prefect.Flow):
@@ -16,9 +17,14 @@ class UFlow(prefect.Flow):
     converting a UFlow object into other objects such as an Airflow DAG object.
     """
 
-    def __init__(self, flow_name: str = None, experiment_name: str = None):
+    def __init__(
+            self,
+            flow_name: str = None,
+            experiment_name: str = None,
+            environment: Environment = None,
+    ):
         """Instantiate UFlow object."""
-        super().__init__(flow_name)
+        super().__init__(name=flow_name, environment=environment)
 
         # Initialize how many times the flow is executed
         self.run_count = 0

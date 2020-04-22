@@ -12,6 +12,7 @@ import cloudpickle
 import mlflow
 import pendulum
 import prefect
+import pyspark.sql as ssql
 from prefect.engine.result_handlers import ResultHandler
 from slugify import slugify
 
@@ -84,10 +85,12 @@ class UResultHandler(ResultHandler):
             - str: the _absolute_ path to the written result on disk
         """
         file_name = (
-            self.task_name + "-result-" + slugify(pendulum.now("utc").isoformat())
+                self.task_name + "-result-" + slugify(pendulum.now("utc").isoformat())
         )
         loc = os.path.join(self.dir, file_name)
         self.logger.debug("Starting to upload result to {}...".format(loc))
+        if isinstance(result, ssql.DataFrame):
+            result = result.collect()
         with open(loc, "wb") as file:
             file.write(cloudpickle.dumps(result))
         self.logger.debug("Finished uploading result to {}...".format(loc))

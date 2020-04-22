@@ -5,8 +5,8 @@ from urllib.parse import urlparse
 import cloudpickle
 import pandas as pd
 
+from .. import shared
 from ..io import ObjType, PyObjFileFormat, TabularFileFormats
-from ..utils.spark import get_spark_session
 
 
 def load(path, obj_type=None):
@@ -44,7 +44,7 @@ def load_py_obj(obj_path, file_format=PyObjFileFormat.Pickle):
             )
 
 
-def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet, **kwargs):
+def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet):
     """
     Loads object.
 
@@ -54,10 +54,11 @@ def load_pd_df(df_path, columns=None, file_format=TabularFileFormats.Parquet, **
     """
 
     if (
-        df_path.endswith(TabularFileFormats.Parquet.value)
-        or file_format == TabularFileFormats.Parquet
+            df_path.endswith(TabularFileFormats.Parquet.value)
+            or file_format == TabularFileFormats.Parquet
     ):
-        return pd.read_parquet(df_path, engine="pyarrow", columns=columns, **kwargs)
+        # TODO add **kwargs
+        return pd.read_parquet(df_path, engine="pyarrow", columns=columns)
     elif (
         df_path.endswith(TabularFileFormats.Feather.value)
         or file_format == TabularFileFormats.Feather
@@ -77,8 +78,7 @@ def load_spark_df(df_path, file_format=TabularFileFormats.Parquet):
     and returns it as a :class:`DataFrame`.
     If name is not None, load the df from the MLflow artifact
     """
-
-    spark = get_spark_session()
+    spark = shared.spark_session
     if file_format == TabularFileFormats.Parquet:
         return spark.read.parquet(df_path)
     else:

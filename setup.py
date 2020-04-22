@@ -20,8 +20,7 @@ setup(
     install_requires=[
         "click>=7.0",
         "mlflow",
-        "prefect[dev]",
-        "apache-airflow",
+        "prefect",
         "pendulum==1.4.4",
         "cloudpickle",
         "pyarrow",
