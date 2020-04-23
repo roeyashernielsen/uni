@@ -20,18 +20,18 @@ setup(
     install_requires=[
         "click>=7.0",
         "mlflow",
-        "prefect[dev]",
-        "apache-airflow",
-        "pendulum==1.4.4",
-        "cloudpickle",
-        "pyarrow",
-        "pyspark",
-        "pandas",
-        "numpy",
+        "prefect[dev]",# don't need dev version
+        #"apache-airflow",
+        #"pendulum==1.4.4",
+        #"cloudpickle",
+        #"pyarrow",
+        #"pyspark",
+        #"pandas",
+        #"numpy",
     ],
     entry_points="""
             [console_scripts]
-            uni=uni.cli:cli
+            uni=uni.converter.main:cli
     """,
     include_package_data=True,
     python_requires=">=3.7",
