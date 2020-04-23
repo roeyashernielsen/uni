@@ -14,6 +14,7 @@ from runpy import run_path
 from typing import Any, Dict, Set, DefaultDict
 from textwrap import dedent, indent
 from collections import Counter
+from dss_recipe_client.initialize_recipe import initialize_recipe
 
 
 def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
@@ -29,13 +30,6 @@ def load_flow_object(flow_definition_path: Path, flow_object_name: str) -> Any:
         raise KeyError(
             "Provided name for flow object does not match flow definition file"
         )
-
-
-def create_recipe(new_recipe_path: Path) -> None:
-    """Create new recipe directory using template (default behavior is overwrite)."""
-    recipe_template_path = Path("src/uni/converter/recipe_template")
-    shutil.rmtree(new_recipe_path, ignore_errors=True)
-    shutil.copytree(recipe_template_path, new_recipe_path)
 
 
 def create_task_name_map(flow: Any) -> Dict[int, str]:
@@ -342,7 +336,13 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # Create new recipe directory with default config files
     # NOTE: this line should be replaced with a call to recipe init to connect with most
     # up-to-date recipe skeleton and default files
-    create_recipe(new_recipe_path)
+    #create_recipe(new_recipe_path)
+    initialize_recipe(
+        'python_recipe',
+        new_recipe_path,
+        no_prompt=True,
+        overwrite_if_exists=True
+    )
 
     # Convert flow definition file into dag definition file
     flow = load_flow_object(flow_definition_path, flow_object_name)
