@@ -5,6 +5,7 @@ The input flow should be defined using UNI UFlow and UStep. The resulting recipe
 ready to be executed immediately.
 """
 
+import uni
 import click
 import subprocess
 import shutil
@@ -303,9 +304,10 @@ def copy_flow_definition_file(
     modify_flow_definition_file(destination_path)
 
 
-def copy_uni_source_code(new_recipe_path: Path) -> None:
+def copy_uni_source_code(new_recipe_path: Path) -> None
     """Copy uni source code into dag/lib directory of recipe."""
-    source_code_path = Path("src/uni/")
+    # NOTE: This is only needed until UNI is installed in the IS containers
+    source_code_path = Path(uni.__path__[0])
     destination_path = new_recipe_path.joinpath("dag/lib/uni")
     shutil.copytree(source_code_path, destination_path)
 
