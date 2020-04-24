@@ -304,7 +304,7 @@ def copy_flow_definition_file(
     modify_flow_definition_file(destination_path)
 
 
-def copy_uni_source_code(new_recipe_path: Path) -> None
+def copy_uni_source_code(new_recipe_path: Path) -> None:
     """Copy uni source code into dag/lib directory of recipe."""
     # NOTE: This is only needed until UNI is installed in the IS containers
     source_code_path = Path(uni.__path__[0])
