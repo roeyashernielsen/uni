@@ -1,7 +1,7 @@
 """UNI cli."""
 
 import click
-from .converter.main import convert
+from .converter.convert import convert
 
 @click.group()
 def uni():
@@ -27,7 +27,7 @@ def uni():
     show_default=True,
     help="name of flow object defined in flow definition file",
 )
-def cli_convert(text):
+def cli_convert():
     return convert(flow_definition_path, new_recipe_path, flow_object_name)
 
 
