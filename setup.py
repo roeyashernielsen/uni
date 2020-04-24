@@ -19,8 +19,8 @@ setup(
     py_modules=["uni"],
     install_requires=[
         "click>=7.0",
-        "mlflow",
-        "prefect[dev]",# don't need dev version
+        #"mlflow",
+        #"prefect[dev]",# don't need dev version
         #"apache-airflow",
         #"pendulum==1.4.4",
         #"cloudpickle",
@@ -31,7 +31,7 @@ setup(
     ],
     entry_points="""
             [console_scripts]
-            uni=uni.cli.main
+            uni=uni.cli:uni
     """,
     include_package_data=True,
     python_requires=">=3.7",
