@@ -31,7 +31,7 @@ setup(
     ],
     entry_points="""
             [console_scripts]
-            uni=uni.converter.main:cli
+            uni=uni.cli.main
     """,
     include_package_data=True,
     python_requires=">=3.7",
