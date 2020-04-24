@@ -312,24 +312,7 @@ def copy_uni_source_code(new_recipe_path: Path) -> None:
     shutil.copytree(source_code_path, destination_path)
 
 
-@click.command()
-@click.argument("flow_definition_path", type=click.Path(exists=True))
-@click.option(
-    "--new-recipe-path",
-    "-n",
-    default="../my_recipe",
-    show_default=True,
-    help="location of directory containing newly created recipe",
-    type=click.Path(resolve_path=True),
-)
-@click.option(
-    "--flow-object-name",
-    "-f",
-    default="flow",
-    show_default=True,
-    help="name of flow object defined in flow definition file",
-)
-def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) -> None:
+def convert(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) -> None:
     """FLOW_DEFINITION_PATH: location of .py file containing flow definition."""
     # Convert string paths into OS-agnostic Path objects
     flow_definition_path = Path(flow_definition_path)
@@ -364,7 +347,3 @@ def cli(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) 
     # NOTE: this line should be removed once UNI is available as a package
     copy_uni_source_code(new_recipe_path)
     click.echo("Creating recipe...COMPLETE")
-
-
-if __name__ == "__main__":
-    cli()
