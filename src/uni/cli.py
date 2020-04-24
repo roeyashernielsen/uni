@@ -27,7 +27,7 @@ def uni():
     show_default=True,
     help="name of flow object defined in flow definition file",
 )
-def cli_convert():
+def cli_convert(flow_definition_path: str, new_recipe_path: str, flow_object_name: str) -> None:
     return convert(flow_definition_path, new_recipe_path, flow_object_name)
 
 
